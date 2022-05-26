@@ -34,6 +34,14 @@
     <Page Remove="Test\**" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="packageicon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packageicon.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="VishizhukelNet" Version="2.0.1037.1085" />
   </ItemGroup>
 </Project>
