@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWPF>true</UseWPF>
+    <GenerateBuildInfoConfigFile>false</GenerateBuildInfoConfigFile>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <Deterministic>false</Deterministic>
+    <AssemblyTitle>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb</AssemblyTitle>
+    <AssemblyProduct>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb</AssemblyProduct>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/aspenlaub/VishizhukelNetWeb.git</RepositoryUrl>
+    <RepositoryBranch>master</RepositoryBranch>
+    <PackageId>VishizhukelNetWeb</PackageId>
+    <VersionDays>$([System.DateTime]::UtcNow.Subtract($([System.DateTime]::Parse("2019-07-24"))).Days.ToString())</VersionDays>
+    <VersionMinutes>$([System.Math]::Floor($([System.DateTime]::UtcNow.Subtract($([System.DateTime]::UtcNow.Date)).TotalMinutes)).ToString())</VersionMinutes>
+    <Version>2.0.$(VersionDays).$(VersionMinutes)</Version>
+    <RootNamespace>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb</RootNamespace>
+    <AssemblyName>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <NuspecFile>VishizhukelNetWeb.nuspec</NuspecFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Integration\**" />
+    <Compile Remove="Test\**" />
+    <EmbeddedResource Remove="Integration\**" />
+    <EmbeddedResource Remove="Test\**" />
+    <None Remove="Integration\**" />
+    <None Remove="Test\**" />
+    <Page Remove="Integration\**" />
+    <Page Remove="Test\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="VishizhukelNet" Version="2.0.1037.1085" />
+  </ItemGroup>
+</Project>
