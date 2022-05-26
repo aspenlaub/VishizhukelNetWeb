@@ -8,7 +8,7 @@ using IApplicationModel = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Web
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Handlers;
 
-public class TashSelectorHandler : TashSelectorHandlerBase<Interfaces.IApplicationModel> {
+public class TashSelectorHandler : TashSelectorHandlerBase<IApplicationModel> {
     // ReSharper disable once NotAccessedField.Local
     private readonly IApplicationHandlers ApplicationHandlers;
 

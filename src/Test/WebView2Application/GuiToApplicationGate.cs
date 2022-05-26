@@ -1,5 +1,4 @@
-﻿using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
-using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
+﻿using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using VishizhukelWebView2Application = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Application.Application;
