@@ -1,0 +1,8 @@
+﻿<Application x:Class="Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Startup="LaunchWindows">
+    <Application.Resources>
+
+    </Application.Resources>
+</Application>

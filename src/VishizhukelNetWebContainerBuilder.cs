@@ -2,6 +2,8 @@
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Autofac;
 using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable UnusedMember.Global
@@ -23,6 +25,8 @@ public static class VishizhukelNetWebContainerBuilder {
         } else {
             await services.UseVishizhukelNetAndPeghAsync(csArgumentPrompter);
         }
+
+        services.AddTransient<IOucidLogAccessor, OucidLogAccessor>();
         return services;
     }
 
@@ -41,6 +45,7 @@ public static class VishizhukelNetWebContainerBuilder {
             await builder.UseVishizhukelNetAndPeghAsync(csArgumentPrompter, logConfiguration);
         }
 
+        builder.RegisterType<OucidLogAccessor>().As<IOucidLogAccessor>();
         return builder;
     }
 }
