@@ -19,7 +19,8 @@ public class TashVerifyAndSetHandler : TashVerifyAndSetHandlerBase<IApplicationM
 
     protected override Dictionary<string, ITextBox> TextBoxNamesToTextBoxDictionary(ITashTaskHandlingStatus<IApplicationModel> status) {
         return new() {
-            { nameof(status.Model.WebViewUrl), status.Model.WebViewUrl }
+            { nameof(status.Model.WebViewUrl), status.Model.WebViewUrl },
+            { nameof(status.Model.Status), status.Model.Status },
         };
     }
 
