@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Windows;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Helpers;
@@ -9,6 +12,7 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Autofac;
+using Microsoft.Web.WebView2.Core;
 using Moq;
 using IContainer = Autofac.IContainer;
 using WindowsApplication = System.Windows.Application;
@@ -27,6 +31,16 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
 
     public VishizhukelNetWebView2Window() {
         InitializeComponent();
+#pragma warning disable CS4014
+        InitializeBrowserAsync();
+#pragma warning restore CS4014
+    }
+
+    private async Task InitializeBrowserAsync() {
+        var cacheFolder = new Folder(Path.GetTempPath()).SubFolder("AspenlaubTemp").SubFolder("WebViewCache");
+        cacheFolder.CreateIfNecessary();
+        var webView2Environment = await CoreWebView2Environment.CreateAsync(null, cacheFolder.FullName);
+        await WebView.EnsureCoreWebView2Async(webView2Environment);
     }
 
     private async Task BuildContainerIfNecessaryAsync() {

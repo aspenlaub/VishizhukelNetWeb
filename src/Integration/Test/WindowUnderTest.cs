@@ -12,7 +12,8 @@ public class WindowUnderTest : WindowUnderTestActions, IDisposable {
         StarterAndStopper = starterAndStopper;
     }
 
-    public void Initialize() {
+    public override async Task InitializeAsync() {
+        await base.InitializeAsync();
         StarterAndStopper.Start(WindowUnderTestClassName);
     }
 

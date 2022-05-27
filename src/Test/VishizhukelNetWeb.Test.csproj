@@ -14,6 +14,7 @@
     <AssemblyTitle>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test</AssemblyTitle>
     <AssemblyProduct>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test</AssemblyProduct>
     <StartupObject>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.App</StartupObject>
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />

@@ -5,6 +5,6 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test;
 [TestClass]
 public class NotATest {
     [TestMethod]
-    public void TestMethod() {
+    public void NotATestMethod() {
     }
 }
