@@ -47,5 +47,4 @@ public class TashVerifyAndSetHandler : TashVerifyAndSetHandlerBase<IApplicationM
             status.Model.Status.Type = string.IsNullOrEmpty(status.Model.Status.Text) ? StatusType.Success : StatusType.Error;
         }
     }
-
 }

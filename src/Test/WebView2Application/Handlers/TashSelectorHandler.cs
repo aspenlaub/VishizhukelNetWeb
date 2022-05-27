@@ -18,7 +18,21 @@ public class TashSelectorHandler : TashSelectorHandlerBase<IApplicationModel> {
     }
 
     protected override async Task SelectedIndexChangedAsync(ITashTaskHandlingStatus<IApplicationModel> status, string controlName, int selectedIndex, bool selectablesChanged) {
-        await Task.CompletedTask;
+        if (selectedIndex < 0) { return; }
+
+        SimpleLogger.LogInformation($"Changing selected index for {controlName} to {selectedIndex}");
+        switch (controlName) {
+            case nameof(status.Model.SelectedTestCase):
+                await ApplicationHandlers.TestCaseSelectorHandler.TestCasesSelectedIndexChangedAsync(selectedIndex, selectablesChanged);
+                break;
+            default:
+                var errorMessage = $"Do not know how to select for {status.TaskBeingProcessed.ControlName}";
+                SimpleLogger.LogInformation(
+                    $"Communicating 'BadRequest' to remote controlling process ({errorMessage})");
+                await TashCommunicator.ChangeCommunicateAndShowProcessTaskStatusAsync(status,
+                    ControllableProcessTaskStatus.BadRequest, false, "", errorMessage);
+                break;
+        }
     }
 
     public override async Task ProcessSelectComboOrResetTaskAsync(ITashTaskHandlingStatus<IApplicationModel> status) {

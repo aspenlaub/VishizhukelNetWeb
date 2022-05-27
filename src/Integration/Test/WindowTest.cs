@@ -1,9 +1,9 @@
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Tash;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Helpers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using VishizhukelNetWebView2ApplicationModel = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities.ApplicationModel;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Integration.Test;
 
@@ -18,8 +18,8 @@ public class WindowTest : IntegrationTestBase {
             File.Delete(logFileName);
         }
         var tasks = new List<ControllableProcessTask> {
-            sut.CreateSetValueTask(process, nameof(VishizhukelNetWebView2ApplicationModel.WebViewUrl), "http://localhost/"),
-            sut.CreatePressButtonTask(process, nameof(VishizhukelNetWebView2ApplicationModel.GoToUrl))
+            sut.CreateSetValueTask(process, nameof(ApplicationModel.WebViewUrl), "http://localhost/"),
+            sut.CreatePressButtonTask(process, nameof(ApplicationModel.GoToUrl))
         };
         await sut.RemotelyProcessTaskListAsync(process, tasks);
         Assert.IsTrue(File.Exists(logFileName));

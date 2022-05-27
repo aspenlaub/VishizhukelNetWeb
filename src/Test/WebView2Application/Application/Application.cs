@@ -83,9 +83,11 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
             RunTestCaseCommand = new RunTestCaseCommand(Model, this, ApplicationLogger, LogicalUrlRepository)
         };
         var communicator = new TashCommunicatorBase<IApplicationModel>(TashAccessor, SimpleLogger, LogConfiguration);
-        var selectors = new Dictionary<string, ISelector>();
+        var selectors = new Dictionary<string, ISelector> {
+            { nameof(IApplicationModel.SelectedTestCase), Model.SelectedTestCase }
+        };
         var selectorHandler = new TashSelectorHandler(Handlers, SimpleLogger, communicator, selectors);
-        var verifyAndSetHandler = new TashVerifyAndSetHandler(Handlers, SimpleLogger, null, communicator, selectors);
+        var verifyAndSetHandler = new TashVerifyAndSetHandler(Handlers, SimpleLogger, selectorHandler, communicator, selectors);
         TashHandler = new TashHandler(TashAccessor, SimpleLogger, LogConfiguration, ButtonNameToCommandMapper, ToggleButtonNameToHandlerMapper, this, verifyAndSetHandler, selectorHandler, communicator);
     }
 
