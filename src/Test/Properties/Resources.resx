@@ -117,6 +117,66 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AlwaysFails" xml:space="preserve">
+    <value>Always fails</value>
+  </data>
+  <data name="AlwaysSucceeds" xml:space="preserve">
+    <value>Always succeeds</value>
+  </data>
+  <data name="CanFindAnchor" xml:space="preserve">
+    <value>Can find anchor</value>
+  </data>
+  <data name="CanFindBody" xml:space="preserve">
+    <value>Can find body</value>
+  </data>
+  <data name="CanFindExactlyOneInputElement" xml:space="preserve">
+    <value>Can find exactly one input element</value>
+  </data>
+  <data name="CanFindLamasMainByClass" xml:space="preserve">
+    <value>Can find Lamas' main by class</value>
+  </data>
+  <data name="CannotFindAnchorWhichIsNotDivLike" xml:space="preserve">
+    <value>Cannot find anchor (because it is not div-like)</value>
+  </data>
+  <data name="CannotFindExactlyOneInputElement" xml:space="preserve">
+    <value>Cannot find exactly one input element</value>
+  </data>
+  <data name="CanOnlyRunTestCasesWithRealWebView" xml:space="preserve">
+    <value>Test cases can only be run using real web view</value>
+  </data>
+  <data name="NoResultReceived" xml:space="preserve">
+    <value>No result received</value>
+  </data>
+  <data name="ResultIsInconclusive" xml:space="preserve">
+    <value>Result is inconclusive</value>
+  </data>
+  <data name="ScriptCallFailedButWrongErrorMessage" xml:space="preserve">
+    <value>Script call failed as expected, but not with error message "{0}"</value>
+  </data>
+  <data name="ScriptCallFailedTechnically" xml:space="preserve">
+    <value>Script call failed technically</value>
+  </data>
+  <data name="ScriptCallFailureExpected" xml:space="preserve">
+    <value>Script call succeeded, expected failure with error message "{0}"</value>
+  </data>
+  <data name="ScriptCallSucceededButDomElementDoesNotHaveClass" xml:space="preserve">
+    <value>Script call succeeded, but dom element does not have class "{0}"</value>
+  </data>
+  <data name="ScriptCallSucceededButMisMatchInNthOfClass" xml:space="preserve">
+    <value>Script call succeeded, but there is a mismatch in NthOfClass</value>
+  </data>
+  <data name="ScriptCallSucceededButNoDomElement" xml:space="preserve">
+    <value>Script call succeeded, but no dom element with classes was returned</value>
+  </data>
+  <data name="ScriptCallSucceededButNoNthOfClass" xml:space="preserve">
+    <value>Script call succeeded, but dom element does not have NthOfClass</value>
+  </data>
+  <data name="TestCaseFailed" xml:space="preserve">
+    <value>Test case failed</value>
+  </data>
+  <data name="TestCaseSucceeded" xml:space="preserve">
+    <value>Test case succeeded</value>
+  </data>
   <data name="WebViewWindowTitle" xml:space="preserve">
     <value>Web View Window</value>
   </data>

@@ -6,4 +6,5 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
 public class ApplicationHandlers : IApplicationHandlers {
     public ISimpleTextHandler WebViewUrlTextHandler { get; set; }
     public ISimpleTextHandler WebViewContentSourceTextHandler { get; set; }
+    public ITestCaseSelectorHandler TestCaseSelectorHandler { get; set; }
 }

@@ -1,11 +1,15 @@
 ﻿using System.Diagnostics;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.Vishizhukel.Interfaces.Application;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Entities;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Handlers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Application;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Commands;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
@@ -22,29 +26,61 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
     private readonly ITashAccessor TashAccessor;
     private readonly ISimpleLogger SimpleLogger;
     private readonly ILogConfiguration LogConfiguration;
+    private readonly ILogicalUrlRepository LogicalUrlRepository;
 
     public Application(IButtonNameToCommandMapper buttonNameToCommandMapper, IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
-        IGuiAndWebViewApplicationSynchronizer<ApplicationModel> guiAndApplicationSynchronizer, ApplicationModel model,
-        ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogConfiguration logConfiguration, IApplicationLogger applicationLogger)
+            IGuiAndWebViewApplicationSynchronizer<ApplicationModel> guiAndApplicationSynchronizer, ApplicationModel model,
+            ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogConfiguration logConfiguration, IApplicationLogger applicationLogger,
+            ILogicalUrlRepository logicalUrlRepository)
         : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, applicationLogger) {
         TashAccessor = tashAccessor;
         SimpleLogger = simpleLogger;
         LogConfiguration = logConfiguration;
+        LogicalUrlRepository = logicalUrlRepository;
+    }
+
+    public override async Task OnLoadedAsync() {
+        await base.OnLoadedAsync();
+        await Handlers.TestCaseSelectorHandler.UpdateSelectableTestCasesAsync();
+
+        var errorsAndInfos = new ErrorsAndInfos();
+        var oustUrl = await LogicalUrlRepository.GetUrlAsync("Oust", errorsAndInfos);
+        if (errorsAndInfos.AnyErrors()) {
+            Model.Status.Type = StatusType.Error;
+            Model.Status.Text = errorsAndInfos.ErrorsToString();
+            return;
+        }
+
+        var oustUtilitiesUrl = oustUrl + "oustutilitiesjs.php";
+        var jQueryUrl = oustUrl + "jquery.php";
+        Model.WebView.OnDocumentLoaded.AppendStatement(
+            "var script = document.createElement(\"script\"); "
+            + $"script.src = \"{oustUtilitiesUrl}\"; "
+            + "document.head.appendChild(script);"
+            + "if (typeof($jq) == 'undefined') {"
+            + "var script = document.createElement(\"script\"); "
+            + $"script.src = \"{jQueryUrl}\"; "
+            + "document.head.appendChild(script);"
+            + "}"
+        );
     }
 
     protected override async Task EnableOrDisableButtonsAsync() {
         Model.GoToUrl.Enabled = await Commands.GoToUrlCommand.ShouldBeEnabledAsync();
         Model.RunJs.Enabled = await Commands.RunJsCommand.ShouldBeEnabledAsync();
+        Model.RunTestCase.Enabled = await Commands.RunTestCaseCommand.ShouldBeEnabledAsync();
     }
 
     protected override void CreateCommandsAndHandlers() {
         Handlers = new ApplicationHandlers {
             WebViewUrlTextHandler = new WebViewUrlTextHandler(Model, this),
-            WebViewContentSourceTextHandler = new WebViewContentSourceTextHandler(Model, this)
+            WebViewContentSourceTextHandler = new WebViewContentSourceTextHandler(Model, this),
+            TestCaseSelectorHandler = new TestCaseSelectorHandler(Model, this)
         };
         Commands = new ApplicationCommands {
             GoToUrlCommand = new GoToUrlCommand(Model, WebViewNavigationHelper),
-            RunJsCommand = new RunJsCommand(Model, this)
+            RunJsCommand = new RunJsCommand(Model, this),
+            RunTestCaseCommand = new RunTestCaseCommand(Model, this, ApplicationLogger, LogicalUrlRepository)
         };
         var communicator = new TashCommunicatorBase<IApplicationModel>(TashAccessor, SimpleLogger, LogConfiguration);
         var selectors = new Dictionary<string, ISelector>();

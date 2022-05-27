@@ -76,8 +76,12 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
 
         guiToAppGate.WireButtonAndCommand(GoToUrl, commands.GoToUrlCommand, buttonNameToCommandMapper);
         guiToAppGate.WireButtonAndCommand(RunJs, commands.RunJsCommand, buttonNameToCommandMapper);
+        guiToAppGate.WireButtonAndCommand(RunTestCase, commands.RunTestCaseCommand, buttonNameToCommandMapper);
 
         guiToAppGate.WireWebView(WebView);
+
+        var handlers = Application.Handlers;
+        guiToAppGate.RegisterAsyncSelectorCallback(SelectedTestCase, i => handlers.TestCaseSelectorHandler.TestCasesSelectedIndexChangedAsync(i, false));
 
         if (IsWindowUnderTest) {
             TashTimer = new TashTimer<ApplicationModel>(Container.Resolve<ITashAccessor>(), Application.TashHandler, guiToAppGate);

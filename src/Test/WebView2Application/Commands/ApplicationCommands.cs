@@ -6,4 +6,5 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
 public class ApplicationCommands : IApplicationCommands {
     public ICommand GoToUrlCommand { get; set; }
     public ICommand RunJsCommand { get; set; }
+    public ICommand RunTestCaseCommand { get; set; }
 }
