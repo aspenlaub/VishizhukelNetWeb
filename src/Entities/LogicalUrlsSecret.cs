@@ -1,6 +1,6 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 
-namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities; 
+namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 
 public class LogicalUrlsSecret : ISecret<LogicalUrls> {
     private LogicalUrls LogicalFolders;

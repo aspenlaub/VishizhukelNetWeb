@@ -9,8 +9,8 @@ using IWebViewApplicationModelBase = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetW
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.GUI;
 
-public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel> 
-        : GuiToApplicationGateBase<TApplication, TModel>, IGuiToWebViewApplicationGate 
+public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel>
+        : GuiToApplicationGateBase<TApplication, TModel>, IGuiToWebViewApplicationGate
             where TApplication : class, Interfaces.IGuiAndWebViewAppHandler<TModel>
             where TModel : IWebViewApplicationModelBase {
     protected GuiToWebViewApplicationGateBase(IBusy busy, TApplication application) : base(busy, application) {

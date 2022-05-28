@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Aspenlaub.Net.GitHub.CSharp.Vishizhukel.Interfaces.Application;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Application;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
+using Microsoft.Extensions.Logging;
 using IScriptCallResponse = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptCallResponse;
 using IScriptStatement = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptStatement;
 using IWebViewApplicationModelBase = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewApplicationModelBase;
@@ -13,7 +14,7 @@ using IWebViewNavigationHelper = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.I
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Application;
 
-public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TModel> 
+public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TModel>
         : ApplicationBase<TGuiAndApplicationSynchronizer, TModel>, Interfaces.IGuiAndWebViewAppHandler<TModel>
             where TModel : class, IWebViewApplicationModelBase
             where TGuiAndApplicationSynchronizer : Interfaces.IGuiAndWebViewApplicationSynchronizer<TModel> {
@@ -23,11 +24,11 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     protected WebViewApplicationBase(IButtonNameToCommandMapper buttonNameToCommandMapper,
         IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
         TGuiAndApplicationSynchronizer guiAndApplicationSynchronizer, TModel model,
-        IApplicationLogger applicationLogger)
+        ISimpleLogger simpleLogger)
         : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model,
-            applicationLogger) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, applicationLogger);
-        WebViewNavigationHelper = new WebViewNavigationHelper<TModel>(model, applicationLogger, this, WebViewNavigatingHelper);
+            simpleLogger) {
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger);
+        WebViewNavigationHelper = new WebViewNavigationHelper<TModel>(model, simpleLogger, this, WebViewNavigatingHelper);
     }
 
     public override async Task OnLoadedAsync() {
@@ -37,23 +38,23 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task OnWebViewSourceChangedAsync(string uri) {
-        ApplicationLogger.LogMessage($"Web view source changes to '{uri}'");
+        SimpleLogger.LogInformation($"Web view source changes to '{uri}'");
         Model.WebView.IsNavigating = uri != null;
         Model.WebViewUrl.Text = uri ?? "(off road)";
         Model.WebView.LastNavigationStartedAt = DateTime.Now;
         Model.WebViewContentSource.Text = "";
         await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
-        ApplicationLogger.LogMessage($"GUI navigating to '{Model.WebViewUrl.Text}'");
+        SimpleLogger.LogInformation($"GUI navigating to '{Model.WebViewUrl.Text}'");
         IndicateBusy(true);
     }
 
     public async Task OnWebViewNavigationCompletedAsync(string contentSource, bool isSuccess) {
-        ApplicationLogger.LogMessage($"Web view navigation complete: '{Model.WebViewUrl.Text}'");
+        SimpleLogger.LogInformation($"Web view navigation complete: '{Model.WebViewUrl.Text}'");
         Model.WebView.IsNavigating = false;
         Model.WebViewContentSource.Text = contentSource;
         Model.WebView.HasValidDocument = isSuccess;
         if (!isSuccess) {
-            ApplicationLogger.LogMessage(Properties.Resources.AppFailed);
+            SimpleLogger.LogInformation(Properties.Resources.AppFailed);
             Model.Status.Text = Properties.Resources.CouldNotLoadUrl;
             Model.Status.Type = StatusType.Error;
         }
@@ -71,7 +72,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             return scriptCallResponse;
         }
 
-        if (scriptCallResponse.Success.YesNo && maySucceed || !scriptCallResponse.Success.YesNo && mayFail) {
+        if ((scriptCallResponse.Success.YesNo && maySucceed) || (!scriptCallResponse.Success.YesNo && mayFail)) {
             return scriptCallResponse;
         }
 

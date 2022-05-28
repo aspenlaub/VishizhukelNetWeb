@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
@@ -13,10 +13,10 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Autofac;
 using Microsoft.Web.WebView2.Core;
-using Moq;
 using IContainer = Autofac.IContainer;
 using WindowsApplication = System.Windows.Application;
 
+[assembly:InternalsVisibleTo("Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Integration.Test")]
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.GUI;
 
 // ReSharper disable once UnusedMember.Global
@@ -46,11 +46,7 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
     private async Task BuildContainerIfNecessaryAsync() {
         if (Container != null) { return; }
 
-        var logConfigurationMock = new Mock<ILogConfiguration>();
-        logConfigurationMock.SetupGet(lc => lc.LogSubFolder).Returns(@"AspenlaubLogs\" + nameof(VishizhukelNetWebView2Window));
-        logConfigurationMock.SetupGet(lc => lc.LogId).Returns($"{DateTime.Today:yyyy-MM-dd}-{Process.GetCurrentProcess().Id}");
-        logConfigurationMock.SetupGet(lc => lc.DetailedLogging).Returns(true);
-        var builder = await new ContainerBuilder().UseApplicationAsync(this, logConfigurationMock.Object);
+        var builder = await new ContainerBuilder().UseApplicationAsync(this);
         Container = builder.Build();
     }
 

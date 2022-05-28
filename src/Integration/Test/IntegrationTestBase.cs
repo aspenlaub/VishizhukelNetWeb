@@ -1,8 +1,5 @@
-﻿using System.Diagnostics;
-using Aspenlaub.Net.GitHub.CSharp.Tash;
-using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
+﻿using Aspenlaub.Net.GitHub.CSharp.Tash;
 using Autofac;
-using Moq;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Integration.Test;
 
@@ -10,11 +7,7 @@ public class IntegrationTestBase {
     protected readonly IContainer Container;
 
     public IntegrationTestBase() {
-        var logConfigurationMock = new Mock<ILogConfiguration>();
-        logConfigurationMock.SetupGet(lc => lc.LogSubFolder).Returns(@"AspenlaubLogs\" + nameof(IntegrationTestBase));
-        logConfigurationMock.SetupGet(lc => lc.LogId).Returns($"{DateTime.Today:yyyy-MM-dd}-{Process.GetCurrentProcess().Id}");
-        logConfigurationMock.SetupGet(lc => lc.DetailedLogging).Returns(true);
-        Container = new ContainerBuilder().RegisterForIntegrationTest(logConfigurationMock.Object).Build();
+        Container = new ContainerBuilder().RegisterForIntegrationTest().Build();
     }
 
     protected async Task<WindowUnderTest> CreateWindowUnderTestAsync(string windowUnderTestClassName) {

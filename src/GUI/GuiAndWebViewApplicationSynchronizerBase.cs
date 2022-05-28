@@ -4,11 +4,12 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
-using Aspenlaub.Net.GitHub.CSharp.Vishizhukel.Interfaces.Application;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
+using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Wpf;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.GUI;
@@ -18,8 +19,8 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     where TModel : class, IWebViewApplicationModelBase {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
 
-    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, IApplicationLogger applicationLogger) : base(model, window, applicationLogger) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, ApplicationLogger);
+    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger) : base(model, window, simpleLogger) {
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger);
     }
 
     protected override async Task UpdateFieldIfNecessaryAsync(FieldInfo windowField, PropertyInfo modelProperty) {
@@ -44,7 +45,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         }
 
         modelWebView.LastUrl = modelWebView.Url;
-        ApplicationLogger.LogMessage($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'");
+        SimpleLogger.LogInformation($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'");
         var minLastUpdateTime = DateTime.Now;
         webView2.CoreWebView2?.Navigate(modelWebView.Url);
 
@@ -52,20 +53,20 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement) where TResult : IScriptCallResponse, new() {
-        ApplicationLogger.LogMessage(Properties.Resources.ExecutingScript);
+        SimpleLogger.LogInformation(Properties.Resources.ExecutingScript);
         var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
         var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
             ? null
             : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
         if (webView2 == null) {
-            ApplicationLogger.LogMessage(Properties.Resources.UiDoesNotContainAWebView);
+            SimpleLogger.LogInformation(Properties.Resources.UiDoesNotContainAWebView);
             return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.UiDoesNotContainAWebView });
         }
 
         var json = await webView2.CoreWebView2.ExecuteScriptAsync(scriptStatement.Statement);
-        ApplicationLogger.LogMessage(Properties.Resources.ScriptExecutedDeserializingResult);
+        SimpleLogger.LogInformation(Properties.Resources.ScriptExecutedDeserializingResult);
         if (string.IsNullOrEmpty(json)) {
-            ApplicationLogger.LogMessage(Properties.Resources.ScriptCallJsonResultIsEmpty);
+            SimpleLogger.LogInformation(Properties.Resources.ScriptCallJsonResultIsEmpty);
             return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.ScriptCallJsonResultIsEmpty });
         }
 
@@ -79,7 +80,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         } catch {
         }
 
-        ApplicationLogger.LogMessage(Properties.Resources.CouldNotDeserializeScriptCallJsonResult);
+        SimpleLogger.LogInformation(Properties.Resources.CouldNotDeserializeScriptCallJsonResult);
         return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.CouldNotDeserializeScriptCallJsonResult });
     }
 

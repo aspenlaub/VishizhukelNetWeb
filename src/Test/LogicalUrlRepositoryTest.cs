@@ -12,7 +12,7 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test;
 public class LogicalUrlRepositoryTest {
     [TestMethod]
     public async Task CanGetLogicalUrls() {
-        var container = new ContainerBuilder().UsePegh(new DummyCsArgumentPrompter()).Build();
+        var container = new ContainerBuilder().UsePegh("VishizhukelNetWeb", new DummyCsArgumentPrompter()).Build();
         var secretRepository = container.Resolve<ISecretRepository>();
         var sut = new LogicalUrlRepository(secretRepository);
         var errorsAndInfos = new ErrorsAndInfos();

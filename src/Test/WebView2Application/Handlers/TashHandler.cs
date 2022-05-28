@@ -11,10 +11,10 @@ using IApplicationModel = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Web
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Handlers;
 
 public class TashHandler : TashHandlerBase<ApplicationModel> {
-    public TashHandler(ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogConfiguration logConfiguration,
+    public TashHandler(ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory,
         IButtonNameToCommandMapper buttonNameToCommandMapper, IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
         ITashVerifyAndSetHandler<IApplicationModel> tashVerifyAndSetHandler, ITashSelectorHandler<IApplicationModel> tashSelectorHandler, ITashCommunicator<IApplicationModel> tashCommunicator)
-        : base(tashAccessor, simpleLogger, logConfiguration, buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndAppHandler, tashVerifyAndSetHandler, tashSelectorHandler, tashCommunicator) {
+        : base(tashAccessor, simpleLogger, logConfigurationFactory, buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndAppHandler, tashVerifyAndSetHandler, tashSelectorHandler, tashCommunicator) {
     }
 
     protected override async Task ProcessSingleTaskAsync(ITashTaskHandlingStatus<ApplicationModel> status) {

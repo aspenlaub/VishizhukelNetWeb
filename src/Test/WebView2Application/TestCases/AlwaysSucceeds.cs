@@ -1,6 +1,5 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
-using Aspenlaub.Net.GitHub.CSharp.Vishizhukel.Interfaces.Application;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Interfaces;
@@ -12,7 +11,7 @@ public class AlwaysSucceeds : TestCaseBase, ITestCase {
     public string Name => Properties.Resources.AlwaysSucceeds;
 
     public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
-        IApplicationLogger applicationLogger, ILogicalUrlRepository logicalUrlRepository) {
+        ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository) {
         var errorsAndInfos = new ErrorsAndInfos();
         errorsAndInfos.Infos.Add(Properties.Resources.AlwaysSucceeds);
         return await Task.FromResult(errorsAndInfos);

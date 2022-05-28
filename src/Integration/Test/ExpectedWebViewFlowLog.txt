@@ -1,21 +1,21 @@
-﻿ App navigating to 'http://localhost/'
- Wait until not navigating anymore
- Not navigating anymore
- Reset model URL and sync
- Calling webView2.CoreWebView2.Navigate with 'about:blank'
- Wait until not navigating anymore
- Web view source changes to 'about:blank'
- GUI navigating to 'about:blank'
- Web view navigation complete: 'about:blank'
- Not navigating anymore
- Wait until not navigating anymore
- Not navigating anymore
- Set model URL and sync
- Calling webView2.CoreWebView2.Navigate with 'http://localhost/'
- Wait until not navigating anymore
- Web view source changes to 'http://localhost/'
- GUI navigating to 'http://localhost/'
- Web view navigation complete: 'http://localhost/'
- Not navigating anymore
- Wait until not navigating anymore
- Not navigating anymore
+﻿App navigating to 'http://localhost/'
+Wait until not navigating anymore
+Not navigating anymore
+Reset model URL and sync
+Calling webView2.CoreWebView2.Navigate with 'about:blank'
+Wait until not navigating anymore
+Web view source changes to 'about:blank'
+GUI navigating to 'about:blank'
+Web view navigation complete: 'about:blank'
+Not navigating anymore
+Wait until not navigating anymore
+Not navigating anymore
+Set model URL and sync
+Calling webView2.CoreWebView2.Navigate with 'http://localhost/'
+Wait until not navigating anymore
+Web view source changes to 'http://localhost/'
+GUI navigating to 'http://localhost/'
+Web view navigation complete: 'http://localhost/'
+Not navigating anymore
+Wait until not navigating anymore
+Not navigating anymore

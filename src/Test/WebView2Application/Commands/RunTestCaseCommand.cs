@@ -1,4 +1,4 @@
-﻿using Aspenlaub.Net.GitHub.CSharp.Vishizhukel.Interfaces.Application;
+﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
@@ -10,14 +10,14 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
 public class RunTestCaseCommand : ICommand {
     private readonly ApplicationModel Model;
     private readonly IGuiAndWebViewAppHandler<ApplicationModel> GuiAndAppHandler;
-    private readonly IApplicationLogger ApplicationLogger;
+    private readonly ISimpleLogger SimpleLogger;
     private readonly ILogicalUrlRepository LogicalUrlRepository;
 
     public RunTestCaseCommand(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
-            IApplicationLogger applicationLogger, ILogicalUrlRepository logicalUrlRepository) {
+            ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository) {
         Model = model;
         GuiAndAppHandler = guiAndAppHandler;
-        ApplicationLogger = applicationLogger;
+        SimpleLogger = simpleLogger;
         LogicalUrlRepository = logicalUrlRepository;
     }
 
@@ -27,7 +27,7 @@ public class RunTestCaseCommand : ICommand {
         var testCase = AllTestCases.Instance.FirstOrDefault(t => t.Guid == Model.SelectedTestCase.SelectedItem.Guid);
         if (testCase == null) { return; }
 
-        var errorsAndInfos = await testCase.RunAsync(Model, GuiAndAppHandler, ApplicationLogger, LogicalUrlRepository);
+        var errorsAndInfos = await testCase.RunAsync(Model, GuiAndAppHandler, SimpleLogger, LogicalUrlRepository);
 
         if (errorsAndInfos.AnyErrors()) {
             Model.Status.Type = StatusType.Error;

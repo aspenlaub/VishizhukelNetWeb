@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Aspenlaub.Net.GitHub.CSharp.Vishizhukel.Interfaces.Application;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 
@@ -12,37 +13,37 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
     private const int DoubleCheckIntervalInMilliseconds = 200, DoubleCheckLargeIntervalInMilliseconds = 1000;
 
     private readonly IWebViewApplicationModelBase Model;
-    private readonly IApplicationLogger ApplicationLogger;
+    private readonly ISimpleLogger SimpleLogger;
 
-    public WebViewNavigatingHelper(IWebViewApplicationModelBase model, IApplicationLogger applicationLogger) {
+    public WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger) {
         Model = model;
-        ApplicationLogger = applicationLogger;
+        SimpleLogger = simpleLogger;
     }
 
     public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, DateTime minLastUpdateTime) {
         if (Model.WebView is { IsWired: false }) {
             Model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
             Model.Status.Type = StatusType.Error;
-            ApplicationLogger.LogMessage(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'");
+            SimpleLogger.LogInformation(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'");
             return false;
         }
 
-        ApplicationLogger.LogMessage(Properties.Resources.WaitUntilNotNavigatingAnymore);
+        SimpleLogger.LogInformation(Properties.Resources.WaitUntilNotNavigatingAnymore);
         await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, QuickSeconds, IntervalInMilliseconds, DoubleCheckIntervalInMilliseconds);
 
         if (Model.WebView.IsNavigating) {
-            ApplicationLogger.LogMessage(Properties.Resources.WaitLongerUntilNotNavigatingAnymore);
+            SimpleLogger.LogInformation(Properties.Resources.WaitLongerUntilNotNavigatingAnymore);
             await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, MaxSeconds - QuickSeconds, LargeIntervalInMilliseconds, DoubleCheckLargeIntervalInMilliseconds);
         }
 
         if (!Model.WebView.IsNavigating) {
-            ApplicationLogger.LogMessage(Properties.Resources.NotNavigatingAnymore);
+            SimpleLogger.LogInformation(Properties.Resources.NotNavigatingAnymore);
             return true;
         }
 
         Model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, MaxSeconds);
         Model.Status.Type = StatusType.Error;
-        ApplicationLogger.LogMessage(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'");
+        SimpleLogger.LogInformation(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'");
         return false;
 
     }
@@ -55,7 +56,7 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
                 await Task.Delay(TimeSpan.FromMilliseconds(intervalInMilliseconds));
                 attempts--;
                 if (attempts == 0) {
-                    ApplicationLogger.LogMessage($"Still navigating after {seconds} seconds");
+                    SimpleLogger.LogInformation($"Still navigating after {seconds} seconds");
                 }
             }
 
@@ -64,11 +65,11 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
                 await Task.Delay(TimeSpan.FromMilliseconds(doubleCheckIntervalInMilliseconds));
                 attempts--;
                 if (attempts == 0) {
-                    ApplicationLogger.LogMessage($"Still navigating after {seconds} seconds");
+                    SimpleLogger.LogInformation($"Still navigating after {seconds} seconds");
                 }
                 again = Model.WebView.IsNavigating;
                 if (again) {
-                    ApplicationLogger.LogMessage(Properties.Resources.NavigatingAgain);
+                    SimpleLogger.LogInformation(Properties.Resources.NavigatingAgain);
                 }
             }
         } while (again && attempts > 0);

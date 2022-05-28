@@ -8,6 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
+using System.Runtime.CompilerServices;
+
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
     using System;
     
