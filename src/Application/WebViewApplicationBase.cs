@@ -25,10 +25,9 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     protected WebViewApplicationBase(IButtonNameToCommandMapper buttonNameToCommandMapper,
         IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
         TGuiAndApplicationSynchronizer guiAndApplicationSynchronizer, TModel model,
-        ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory)
-        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model,
-            simpleLogger, logConfigurationFactory) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger, LogConfigurationFactory);
+        ISimpleLogger simpleLogger)
+        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger) {
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger);
         WebViewNavigationHelper = new WebViewNavigationHelper<TModel>(model, simpleLogger, this, WebViewNavigatingHelper);
     }
 
@@ -39,8 +38,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task OnWebViewSourceChangedAsync(string uri) {
-        var logConfiguration = LogConfigurationFactory.Create();
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewSourceChangedAsync), logConfiguration.LogId))) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewSourceChangedAsync), SimpleLogger.LogId))) {
             SimpleLogger.LogInformation($"Web view source changes to '{uri}'");
             Model.WebView.IsNavigating = uri != null;
             Model.WebViewUrl.Text = uri ?? "(off road)";
@@ -53,8 +51,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task OnWebViewNavigationCompletedAsync(string contentSource, bool isSuccess) {
-        var logConfiguration = LogConfigurationFactory.Create();
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewNavigationCompletedAsync), logConfiguration.LogId))) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewNavigationCompletedAsync), SimpleLogger.LogId))) {
             SimpleLogger.LogInformation($"Web view navigation complete: '{Model.WebViewUrl.Text}'");
             Model.WebView.IsNavigating = false;
             Model.WebViewContentSource.Text = contentSource;
@@ -71,8 +68,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement, bool mayFail, bool maySucceed) where TResult : IScriptCallResponse, new() {
-        var logConfiguration = LogConfigurationFactory.Create();
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync), logConfiguration.LogId))) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync), SimpleLogger.LogId))) {
             var scriptCallResponse = await GuiAndApplicationSynchronizer.RunScriptAsync<TResult>(scriptStatement);
 
             if (scriptCallResponse.Success.Inconclusive) {

@@ -19,9 +19,9 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     where TModel : class, IWebViewApplicationModelBase {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
 
-    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory)
-            : base(model, window, simpleLogger, logConfigurationFactory) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger, LogConfigurationFactory);
+    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger)
+            : base(model, window, simpleLogger) {
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger);
     }
 
     protected override async Task UpdateFieldIfNecessaryAsync(FieldInfo windowField, PropertyInfo modelProperty) {
@@ -37,8 +37,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     private async Task UpdateWebViewIfNecessaryAsync(IWebView modelWebView, WebView2 webView2) {
-        var logConfiguration = LogConfigurationFactory.Create();
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(UpdateWebViewIfNecessaryAsync), logConfiguration.LogId))) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(UpdateWebViewIfNecessaryAsync), SimpleLogger.LogId))) {
             if (modelWebView == null) {
                 throw new ArgumentNullException(nameof(modelWebView));
             }
@@ -57,8 +56,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement) where TResult : IScriptCallResponse, new() {
-        var logConfiguration = LogConfigurationFactory.Create();
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync) + "Base", logConfiguration.LogId))) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync) + "Base", SimpleLogger.LogId))) {
             SimpleLogger.LogInformation(Properties.Resources.ExecutingScript);
             var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
             var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)

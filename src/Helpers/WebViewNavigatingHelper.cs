@@ -15,17 +15,14 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
 
     private readonly IWebViewApplicationModelBase Model;
     private readonly ISimpleLogger SimpleLogger;
-    private readonly ILogConfigurationFactory LogConfigurationFactory;
 
-    public WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory) {
+    public WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger) {
         Model = model;
         SimpleLogger = simpleLogger;
-        LogConfigurationFactory = logConfigurationFactory;
     }
 
     public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, DateTime minLastUpdateTime) {
-        var logConfiguration = LogConfigurationFactory.Create();
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync), logConfiguration.LogId))) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync), SimpleLogger.LogId))) {
             if (Model.WebView is { IsWired: false }) {
                 Model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
                 Model.Status.Type = StatusType.Error;

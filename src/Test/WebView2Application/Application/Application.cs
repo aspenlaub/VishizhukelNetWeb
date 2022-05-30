@@ -27,9 +27,8 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
 
     public Application(IButtonNameToCommandMapper buttonNameToCommandMapper, IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
             IGuiAndWebViewApplicationSynchronizer<ApplicationModel> guiAndApplicationSynchronizer, ApplicationModel model,
-            ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory,
-            ILogicalUrlRepository logicalUrlRepository)
-        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger, logConfigurationFactory) {
+            ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository)
+        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger) {
         TashAccessor = tashAccessor;
         LogicalUrlRepository = logicalUrlRepository;
     }
@@ -77,13 +76,13 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
             RunJsCommand = new RunJsCommand(Model, this),
             RunTestCaseCommand = new RunTestCaseCommand(Model, this, SimpleLogger, LogicalUrlRepository)
         };
-        var communicator = new TashCommunicatorBase<IApplicationModel>(TashAccessor, SimpleLogger, LogConfigurationFactory);
+        var communicator = new TashCommunicatorBase<IApplicationModel>(TashAccessor, SimpleLogger);
         var selectors = new Dictionary<string, ISelector> {
             { nameof(IApplicationModel.SelectedTestCase), Model.SelectedTestCase }
         };
         var selectorHandler = new TashSelectorHandler(Handlers, SimpleLogger, communicator, selectors);
         var verifyAndSetHandler = new TashVerifyAndSetHandler(Handlers, SimpleLogger, selectorHandler, communicator, selectors);
-        TashHandler = new TashHandler(TashAccessor, SimpleLogger, LogConfigurationFactory, ButtonNameToCommandMapper, ToggleButtonNameToHandlerMapper, this, verifyAndSetHandler, selectorHandler, communicator);
+        TashHandler = new TashHandler(TashAccessor, SimpleLogger, ButtonNameToCommandMapper, ToggleButtonNameToHandlerMapper, this, verifyAndSetHandler, selectorHandler, communicator);
     }
 
     public ITashTaskHandlingStatus<ApplicationModel> CreateTashTaskHandlingStatus() {
