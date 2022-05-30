@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
@@ -14,38 +15,42 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
 
     private readonly IWebViewApplicationModelBase Model;
     private readonly ISimpleLogger SimpleLogger;
+    private readonly ILogConfigurationFactory LogConfigurationFactory;
 
-    public WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger) {
+    public WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory) {
         Model = model;
         SimpleLogger = simpleLogger;
+        LogConfigurationFactory = logConfigurationFactory;
     }
 
     public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, DateTime minLastUpdateTime) {
-        if (Model.WebView is { IsWired: false }) {
-            Model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
+        var logConfiguration = LogConfigurationFactory.Create();
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync), logConfiguration.LogId))) {
+            if (Model.WebView is { IsWired: false }) {
+                Model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
+                Model.Status.Type = StatusType.Error;
+                SimpleLogger.LogInformation(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'");
+                return false;
+            }
+
+            SimpleLogger.LogInformation(Properties.Resources.WaitUntilNotNavigatingAnymore);
+            await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, QuickSeconds, IntervalInMilliseconds, DoubleCheckIntervalInMilliseconds);
+
+            if (Model.WebView.IsNavigating) {
+                SimpleLogger.LogInformation(Properties.Resources.WaitLongerUntilNotNavigatingAnymore);
+                await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, MaxSeconds - QuickSeconds, LargeIntervalInMilliseconds, DoubleCheckLargeIntervalInMilliseconds);
+            }
+
+            if (!Model.WebView.IsNavigating) {
+                SimpleLogger.LogInformation(Properties.Resources.NotNavigatingAnymore);
+                return true;
+            }
+
+            Model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, MaxSeconds);
             Model.Status.Type = StatusType.Error;
             SimpleLogger.LogInformation(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'");
             return false;
         }
-
-        SimpleLogger.LogInformation(Properties.Resources.WaitUntilNotNavigatingAnymore);
-        await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, QuickSeconds, IntervalInMilliseconds, DoubleCheckIntervalInMilliseconds);
-
-        if (Model.WebView.IsNavigating) {
-            SimpleLogger.LogInformation(Properties.Resources.WaitLongerUntilNotNavigatingAnymore);
-            await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, MaxSeconds - QuickSeconds, LargeIntervalInMilliseconds, DoubleCheckLargeIntervalInMilliseconds);
-        }
-
-        if (!Model.WebView.IsNavigating) {
-            SimpleLogger.LogInformation(Properties.Resources.NotNavigatingAnymore);
-            return true;
-        }
-
-        Model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, MaxSeconds);
-        Model.Status.Type = StatusType.Error;
-        SimpleLogger.LogInformation(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'");
-        return false;
-
     }
 
     private async Task WaitUntilNotNavigatingAnymoreAsync(DateTime minLastUpdateTime, int seconds, int intervalInMilliseconds, int doubleCheckIntervalInMilliseconds) {

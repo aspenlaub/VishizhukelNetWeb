@@ -24,16 +24,14 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
     public ITashHandler<ApplicationModel> TashHandler { get; private set; }
     private readonly ITashAccessor TashAccessor;
     private readonly ILogicalUrlRepository LogicalUrlRepository;
-    private readonly ILogConfigurationFactory LogConfigurationFactory;
 
     public Application(IButtonNameToCommandMapper buttonNameToCommandMapper, IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
             IGuiAndWebViewApplicationSynchronizer<ApplicationModel> guiAndApplicationSynchronizer, ApplicationModel model,
             ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory,
             ILogicalUrlRepository logicalUrlRepository)
-        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger) {
+        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger, logConfigurationFactory) {
         TashAccessor = tashAccessor;
         LogicalUrlRepository = logicalUrlRepository;
-        LogConfigurationFactory = logConfigurationFactory;
     }
 
     public override async Task OnLoadedAsync() {

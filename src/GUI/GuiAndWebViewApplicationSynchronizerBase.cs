@@ -19,8 +19,9 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     where TModel : class, IWebViewApplicationModelBase {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
 
-    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger) : base(model, window, simpleLogger) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger);
+    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory)
+            : base(model, window, simpleLogger, logConfigurationFactory) {
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger, LogConfigurationFactory);
     }
 
     protected override async Task UpdateFieldIfNecessaryAsync(FieldInfo windowField, PropertyInfo modelProperty) {
@@ -36,52 +37,58 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     private async Task UpdateWebViewIfNecessaryAsync(IWebView modelWebView, WebView2 webView2) {
-        if (modelWebView == null) {
-            throw new ArgumentNullException(nameof(modelWebView));
+        var logConfiguration = LogConfigurationFactory.Create();
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(UpdateWebViewIfNecessaryAsync), logConfiguration.LogId))) {
+            if (modelWebView == null) {
+                throw new ArgumentNullException(nameof(modelWebView));
+            }
+
+            if (!modelWebView.IsWired || modelWebView.Url == modelWebView.LastUrl) {
+                return;
+            }
+
+            modelWebView.LastUrl = modelWebView.Url;
+            SimpleLogger.LogInformation($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'");
+            var minLastUpdateTime = DateTime.Now;
+            webView2.CoreWebView2?.Navigate(modelWebView.Url);
+
+            await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(modelWebView.LastUrl, minLastUpdateTime);
         }
-
-        if (!modelWebView.IsWired || modelWebView.Url == modelWebView.LastUrl) {
-            return;
-        }
-
-        modelWebView.LastUrl = modelWebView.Url;
-        SimpleLogger.LogInformation($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'");
-        var minLastUpdateTime = DateTime.Now;
-        webView2.CoreWebView2?.Navigate(modelWebView.Url);
-
-        await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(modelWebView.LastUrl, minLastUpdateTime);
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement) where TResult : IScriptCallResponse, new() {
-        SimpleLogger.LogInformation(Properties.Resources.ExecutingScript);
-        var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
-        var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
-            ? null
-            : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
-        if (webView2 == null) {
-            SimpleLogger.LogInformation(Properties.Resources.UiDoesNotContainAWebView);
-            return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.UiDoesNotContainAWebView });
-        }
-
-        var json = await webView2.CoreWebView2.ExecuteScriptAsync(scriptStatement.Statement);
-        SimpleLogger.LogInformation(Properties.Resources.ScriptExecutedDeserializingResult);
-        if (string.IsNullOrEmpty(json)) {
-            SimpleLogger.LogInformation(Properties.Resources.ScriptCallJsonResultIsEmpty);
-            return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.ScriptCallJsonResultIsEmpty });
-        }
-
-        try {
-            var scriptCallResult = JsonSerializer.Deserialize<TResult>(json);
-            if (scriptCallResult is { }) {
-                return scriptCallResult;
-
+        var logConfiguration = LogConfigurationFactory.Create();
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync) + "Base", logConfiguration.LogId))) {
+            SimpleLogger.LogInformation(Properties.Resources.ExecutingScript);
+            var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
+            var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
+                ? null
+                : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
+            if (webView2 == null) {
+                SimpleLogger.LogInformation(Properties.Resources.UiDoesNotContainAWebView);
+                return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.UiDoesNotContainAWebView });
             }
-            // ReSharper disable once EmptyGeneralCatchClause
-        } catch {
-        }
 
-        SimpleLogger.LogInformation(Properties.Resources.CouldNotDeserializeScriptCallJsonResult);
-        return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.CouldNotDeserializeScriptCallJsonResult });
+            var json = await webView2.CoreWebView2.ExecuteScriptAsync(scriptStatement.Statement);
+            SimpleLogger.LogInformation(Properties.Resources.ScriptExecutedDeserializingResult);
+            if (string.IsNullOrEmpty(json)) {
+                SimpleLogger.LogInformation(Properties.Resources.ScriptCallJsonResultIsEmpty);
+                return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.ScriptCallJsonResultIsEmpty });
+            }
+
+            try {
+                var scriptCallResult = JsonSerializer.Deserialize<TResult>(json);
+                if (scriptCallResult is { }) {
+                    return scriptCallResult;
+
+                }
+                // ReSharper disable once EmptyGeneralCatchClause
+            } catch {
+            }
+
+            SimpleLogger.LogInformation(Properties.Resources.CouldNotDeserializeScriptCallJsonResult);
+            return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.CouldNotDeserializeScriptCallJsonResult });
+        }
     }
 
     public async Task WaitUntilNotNavigatingAnymoreAsync() {

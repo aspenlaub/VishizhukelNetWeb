@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Application;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
@@ -24,10 +25,10 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     protected WebViewApplicationBase(IButtonNameToCommandMapper buttonNameToCommandMapper,
         IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
         TGuiAndApplicationSynchronizer guiAndApplicationSynchronizer, TModel model,
-        ISimpleLogger simpleLogger)
+        ISimpleLogger simpleLogger, ILogConfigurationFactory logConfigurationFactory)
         : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model,
-            simpleLogger) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger);
+            simpleLogger, logConfigurationFactory) {
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger, LogConfigurationFactory);
         WebViewNavigationHelper = new WebViewNavigationHelper<TModel>(model, simpleLogger, this, WebViewNavigatingHelper);
     }
 
@@ -38,47 +39,56 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task OnWebViewSourceChangedAsync(string uri) {
-        SimpleLogger.LogInformation($"Web view source changes to '{uri}'");
-        Model.WebView.IsNavigating = uri != null;
-        Model.WebViewUrl.Text = uri ?? "(off road)";
-        Model.WebView.LastNavigationStartedAt = DateTime.Now;
-        Model.WebViewContentSource.Text = "";
-        await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
-        SimpleLogger.LogInformation($"GUI navigating to '{Model.WebViewUrl.Text}'");
-        IndicateBusy(true);
+        var logConfiguration = LogConfigurationFactory.Create();
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewSourceChangedAsync), logConfiguration.LogId))) {
+            SimpleLogger.LogInformation($"Web view source changes to '{uri}'");
+            Model.WebView.IsNavigating = uri != null;
+            Model.WebViewUrl.Text = uri ?? "(off road)";
+            Model.WebView.LastNavigationStartedAt = DateTime.Now;
+            Model.WebViewContentSource.Text = "";
+            await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+            SimpleLogger.LogInformation($"GUI navigating to '{Model.WebViewUrl.Text}'");
+            IndicateBusy(true);
+        }
     }
 
     public async Task OnWebViewNavigationCompletedAsync(string contentSource, bool isSuccess) {
-        SimpleLogger.LogInformation($"Web view navigation complete: '{Model.WebViewUrl.Text}'");
-        Model.WebView.IsNavigating = false;
-        Model.WebViewContentSource.Text = contentSource;
-        Model.WebView.HasValidDocument = isSuccess;
-        if (!isSuccess) {
-            SimpleLogger.LogInformation(Properties.Resources.AppFailed);
-            Model.Status.Text = Properties.Resources.CouldNotLoadUrl;
-            Model.Status.Type = StatusType.Error;
-        }
+        var logConfiguration = LogConfigurationFactory.Create();
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewNavigationCompletedAsync), logConfiguration.LogId))) {
+            SimpleLogger.LogInformation($"Web view navigation complete: '{Model.WebViewUrl.Text}'");
+            Model.WebView.IsNavigating = false;
+            Model.WebViewContentSource.Text = contentSource;
+            Model.WebView.HasValidDocument = isSuccess;
+            if (!isSuccess) {
+                SimpleLogger.LogInformation(Properties.Resources.AppFailed);
+                Model.Status.Text = Properties.Resources.CouldNotLoadUrl;
+                Model.Status.Type = StatusType.Error;
+            }
 
-        await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
-        IndicateBusy(true);
+            await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+            IndicateBusy(true);
+        }
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement, bool mayFail, bool maySucceed) where TResult : IScriptCallResponse, new() {
-        var scriptCallResponse = await GuiAndApplicationSynchronizer.RunScriptAsync<TResult>(scriptStatement);
+        var logConfiguration = LogConfigurationFactory.Create();
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync), logConfiguration.LogId))) {
+            var scriptCallResponse = await GuiAndApplicationSynchronizer.RunScriptAsync<TResult>(scriptStatement);
 
-        if (scriptCallResponse.Success.Inconclusive) {
-            Model.Status.Text = string.IsNullOrEmpty(scriptStatement.InconclusiveErrorMessage) ? scriptStatement.NoSuccessErrorMessage : scriptStatement.InconclusiveErrorMessage;
+            if (scriptCallResponse.Success.Inconclusive) {
+                Model.Status.Text = string.IsNullOrEmpty(scriptStatement.InconclusiveErrorMessage) ? scriptStatement.NoSuccessErrorMessage : scriptStatement.InconclusiveErrorMessage;
+                Model.Status.Type = StatusType.Error;
+                return scriptCallResponse;
+            }
+
+            if ((scriptCallResponse.Success.YesNo && maySucceed) || (!scriptCallResponse.Success.YesNo && mayFail)) {
+                return scriptCallResponse;
+            }
+
+            Model.Status.Text = scriptCallResponse.Success.YesNo ? scriptStatement.NoFailureErrorMessage : scriptStatement.NoSuccessErrorMessage;
             Model.Status.Type = StatusType.Error;
             return scriptCallResponse;
         }
-
-        if ((scriptCallResponse.Success.YesNo && maySucceed) || (!scriptCallResponse.Success.YesNo && mayFail)) {
-            return scriptCallResponse;
-        }
-
-        Model.Status.Text = scriptCallResponse.Success.YesNo ? scriptStatement.NoFailureErrorMessage : scriptStatement.NoSuccessErrorMessage;
-        Model.Status.Type = StatusType.Error;
-        return scriptCallResponse;
     }
 
     public async Task WaitUntilNotNavigatingAnymoreAsync() {

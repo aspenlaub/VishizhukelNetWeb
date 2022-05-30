@@ -9,7 +9,7 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Integration.Test;
 
 [TestClass]
 public class WindowTest : IntegrationTestBase {
-    [TestMethod]
+    [TestMethod, Ignore]
     public async Task WebViewFlowIsCorrect() {
         var logFolder = new Folder(Path.GetTempPath()).SubFolder("AspenlaubLogs").SubFolder("VishizhukelNetWeb");
         var minChangedAt = DateTime.Now;
