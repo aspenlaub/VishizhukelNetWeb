@@ -8,5 +8,5 @@ public interface ITestCase : IGuid {
     string Name { get; }
 
     Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
-        ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository);
+        ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor);
 }

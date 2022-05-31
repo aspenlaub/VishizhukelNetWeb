@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Application;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
-using Microsoft.Extensions.Logging;
 using IScriptCallResponse = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptCallResponse;
 using IScriptStatement = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptStatement;
 using IWebViewApplicationModelBase = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewApplicationModelBase;
@@ -21,14 +21,16 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             where TGuiAndApplicationSynchronizer : Interfaces.IGuiAndWebViewApplicationSynchronizer<TModel> {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
     protected readonly IWebViewNavigationHelper WebViewNavigationHelper;
+    protected readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
 
     protected WebViewApplicationBase(IButtonNameToCommandMapper buttonNameToCommandMapper,
-        IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
-        TGuiAndApplicationSynchronizer guiAndApplicationSynchronizer, TModel model,
-        ISimpleLogger simpleLogger)
+            IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
+            TGuiAndApplicationSynchronizer guiAndApplicationSynchronizer, TModel model,
+            ISimpleLogger simpleLogger, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
         : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger);
-        WebViewNavigationHelper = new WebViewNavigationHelper<TModel>(model, simpleLogger, this, WebViewNavigatingHelper);
+        MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger, MethodNamesFromStackFramesExtractor);
+        WebViewNavigationHelper = new WebViewNavigationHelper<TModel>(model, simpleLogger, this, WebViewNavigatingHelper, MethodNamesFromStackFramesExtractor);
     }
 
     public override async Task OnLoadedAsync() {
@@ -39,25 +41,27 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
 
     public async Task OnWebViewSourceChangedAsync(string uri) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewSourceChangedAsync), SimpleLogger.LogId))) {
-            SimpleLogger.LogInformation($"Web view source changes to '{uri}'");
+            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            SimpleLogger.LogInformationWithCallStack($"Web view source changes to '{uri}'", methodNamesFromStack);
             Model.WebView.IsNavigating = uri != null;
             Model.WebViewUrl.Text = uri ?? "(off road)";
             Model.WebView.LastNavigationStartedAt = DateTime.Now;
             Model.WebViewContentSource.Text = "";
             await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
-            SimpleLogger.LogInformation($"GUI navigating to '{Model.WebViewUrl.Text}'");
+            SimpleLogger.LogInformationWithCallStack($"GUI navigating to '{Model.WebViewUrl.Text}'", methodNamesFromStack);
             IndicateBusy(true);
         }
     }
 
     public async Task OnWebViewNavigationCompletedAsync(string contentSource, bool isSuccess) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewNavigationCompletedAsync), SimpleLogger.LogId))) {
-            SimpleLogger.LogInformation($"Web view navigation complete: '{Model.WebViewUrl.Text}'");
+            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            SimpleLogger.LogInformationWithCallStack($"Web view navigation complete: '{Model.WebViewUrl.Text}'", methodNamesFromStack);
             Model.WebView.IsNavigating = false;
             Model.WebViewContentSource.Text = contentSource;
             Model.WebView.HasValidDocument = isSuccess;
             if (!isSuccess) {
-                SimpleLogger.LogInformation(Properties.Resources.AppFailed);
+                SimpleLogger.LogInformationWithCallStack(Properties.Resources.AppFailed, methodNamesFromStack);
                 Model.Status.Text = Properties.Resources.CouldNotLoadUrl;
                 Model.Status.Type = StatusType.Error;
             }

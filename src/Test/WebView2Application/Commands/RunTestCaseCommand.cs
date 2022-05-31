@@ -12,13 +12,15 @@ public class RunTestCaseCommand : ICommand {
     private readonly IGuiAndWebViewAppHandler<ApplicationModel> GuiAndAppHandler;
     private readonly ISimpleLogger SimpleLogger;
     private readonly ILogicalUrlRepository LogicalUrlRepository;
+    private readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
 
     public RunTestCaseCommand(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
-            ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository) {
+            ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
         Model = model;
         GuiAndAppHandler = guiAndAppHandler;
         SimpleLogger = simpleLogger;
         LogicalUrlRepository = logicalUrlRepository;
+        MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
     }
 
     public async Task ExecuteAsync() {
@@ -27,7 +29,7 @@ public class RunTestCaseCommand : ICommand {
         var testCase = AllTestCases.Instance.FirstOrDefault(t => t.Guid == Model.SelectedTestCase.SelectedItem.Guid);
         if (testCase == null) { return; }
 
-        var errorsAndInfos = await testCase.RunAsync(Model, GuiAndAppHandler, SimpleLogger, LogicalUrlRepository);
+        var errorsAndInfos = await testCase.RunAsync(Model, GuiAndAppHandler, SimpleLogger, LogicalUrlRepository, MethodNamesFromStackFramesExtractor);
 
         if (errorsAndInfos.AnyErrors()) {
             Model.Status.Type = StatusType.Error;

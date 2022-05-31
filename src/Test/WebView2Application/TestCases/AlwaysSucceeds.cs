@@ -11,7 +11,7 @@ public class AlwaysSucceeds : TestCaseBase, ITestCase {
     public string Name => Properties.Resources.AlwaysSucceeds;
 
     public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
-        ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository) {
+            ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
         var errorsAndInfos = new ErrorsAndInfos();
         errorsAndInfos.Infos.Add(Properties.Resources.AlwaysSucceeds);
         return await Task.FromResult(errorsAndInfos);

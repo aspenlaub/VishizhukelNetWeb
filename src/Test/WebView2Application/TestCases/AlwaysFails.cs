@@ -11,7 +11,7 @@ public class AlwaysFails : TestCaseBase, ITestCase {
     public string Name => Properties.Resources.AlwaysFails;
 
     public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
-        ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository) {
+            ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
         var errorsAndInfos = new ErrorsAndInfos();
         errorsAndInfos.Errors.Add(Properties.Resources.AlwaysFails);
         return await Task.FromResult(errorsAndInfos);

@@ -12,8 +12,8 @@ public class TashVerifyAndSetHandler : TashVerifyAndSetHandlerBase<IApplicationM
     private readonly IApplicationHandlers ApplicationHandlers;
 
     public TashVerifyAndSetHandler(IApplicationHandlers applicationHandlers, ISimpleLogger simpleLogger, ITashSelectorHandler<IApplicationModel> tashSelectorHandler,
-        ITashCommunicator<IApplicationModel> tashCommunicator, Dictionary<string, ISelector> selectors)
-        : base(simpleLogger, tashSelectorHandler, tashCommunicator, selectors) {
+        ITashCommunicator<IApplicationModel> tashCommunicator, Dictionary<string, ISelector> selectors, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
+        : base(simpleLogger, tashSelectorHandler, tashCommunicator, selectors, methodNamesFromStackFramesExtractor) {
         ApplicationHandlers = applicationHandlers;
     }
 

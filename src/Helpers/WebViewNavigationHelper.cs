@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
-using Microsoft.Extensions.Logging;
 using IWebViewApplicationModelBase = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewApplicationModelBase;
 using IWebViewNavigatingHelper = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewNavigatingHelper;
 using IWebViewNavigationHelper = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewNavigationHelper;
@@ -15,22 +15,26 @@ public class WebViewNavigationHelper<TModel> : IWebViewNavigationHelper where TM
     private readonly ISimpleLogger SimpleLogger;
     private readonly IGuiAndAppHandler<TModel> GuiAndAppHandler;
     private readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
+    private readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
 
-    public WebViewNavigationHelper(TModel model, ISimpleLogger simpleLogger, IGuiAndAppHandler<TModel> guiAndAppHandler, IWebViewNavigatingHelper webViewNavigatingHelper) {
+    public WebViewNavigationHelper(TModel model, ISimpleLogger simpleLogger, IGuiAndAppHandler<TModel> guiAndAppHandler,
+            IWebViewNavigatingHelper webViewNavigatingHelper, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
         Model = model;
         SimpleLogger = simpleLogger;
         GuiAndAppHandler = guiAndAppHandler;
         WebViewNavigatingHelper = webViewNavigatingHelper;
+        MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
     }
 
     public async Task<bool> NavigateToUrlAsync(string url) {
-        SimpleLogger.LogInformation($"App navigating to '{url}'");
+        var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
         if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, DateTime.MinValue)) {
             return false;
         }
 
-        SimpleLogger.LogInformation(Properties.Resources.ResetModelUrlAndSync);
+        SimpleLogger.LogInformationWithCallStack(Properties.Resources.ResetModelUrlAndSync, methodNamesFromStack);
         Model.WebView.Url = Urls.AboutBlank;
         var minLastUpdateTime = DateTime.Now;
         await GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
@@ -39,7 +43,7 @@ public class WebViewNavigationHelper<TModel> : IWebViewNavigationHelper where TM
             return false;
         }
 
-        SimpleLogger.LogInformation(Properties.Resources.SetModelUrlAndAsync);
+        SimpleLogger.LogInformationWithCallStack(Properties.Resources.SetModelUrlAndAsync, methodNamesFromStack);
         Model.WebView.Url = url;
         minLastUpdateTime = DateTime.Now;
         await GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();

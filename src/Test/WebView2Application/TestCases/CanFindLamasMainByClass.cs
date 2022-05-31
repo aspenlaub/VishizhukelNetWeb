@@ -13,10 +13,10 @@ public class CanFindLamasMainByClass : TestCaseBase, ITestCase {
     public string Name => Properties.Resources.CanFindLamasMainByClass;
 
     public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
-        ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository) {
+            ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
         var errorsAndInfos = new ErrorsAndInfos();
         await GoToUrlAsync("Rhönlamas", model, guiAndAppHandler,
-            simpleLogger, logicalUrlRepository, errorsAndInfos);
+            simpleLogger, logicalUrlRepository, methodNamesFromStackFramesExtractor, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) { return errorsAndInfos; }
 
         var scriptStatement = new ScriptStatement {

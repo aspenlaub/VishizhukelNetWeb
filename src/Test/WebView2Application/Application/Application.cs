@@ -27,8 +27,8 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
 
     public Application(IButtonNameToCommandMapper buttonNameToCommandMapper, IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
             IGuiAndWebViewApplicationSynchronizer<ApplicationModel> guiAndApplicationSynchronizer, ApplicationModel model,
-            ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository)
-        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger) {
+            ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
+        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger, methodNamesFromStackFramesExtractor) {
         TashAccessor = tashAccessor;
         LogicalUrlRepository = logicalUrlRepository;
     }
@@ -74,15 +74,15 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
         Commands = new ApplicationCommands {
             GoToUrlCommand = new GoToUrlCommand(Model, WebViewNavigationHelper),
             RunJsCommand = new RunJsCommand(Model, this),
-            RunTestCaseCommand = new RunTestCaseCommand(Model, this, SimpleLogger, LogicalUrlRepository)
+            RunTestCaseCommand = new RunTestCaseCommand(Model, this, SimpleLogger, LogicalUrlRepository, MethodNamesFromStackFramesExtractor)
         };
-        var communicator = new TashCommunicatorBase<IApplicationModel>(TashAccessor, SimpleLogger);
+        var communicator = new TashCommunicatorBase<IApplicationModel>(TashAccessor, SimpleLogger, MethodNamesFromStackFramesExtractor);
         var selectors = new Dictionary<string, ISelector> {
             { nameof(IApplicationModel.SelectedTestCase), Model.SelectedTestCase }
         };
-        var selectorHandler = new TashSelectorHandler(Handlers, SimpleLogger, communicator, selectors);
-        var verifyAndSetHandler = new TashVerifyAndSetHandler(Handlers, SimpleLogger, selectorHandler, communicator, selectors);
-        TashHandler = new TashHandler(TashAccessor, SimpleLogger, ButtonNameToCommandMapper, ToggleButtonNameToHandlerMapper, this, verifyAndSetHandler, selectorHandler, communicator);
+        var selectorHandler = new TashSelectorHandler(Handlers, SimpleLogger, communicator, selectors, MethodNamesFromStackFramesExtractor);
+        var verifyAndSetHandler = new TashVerifyAndSetHandler(Handlers, SimpleLogger, selectorHandler, communicator, selectors, MethodNamesFromStackFramesExtractor);
+        TashHandler = new TashHandler(TashAccessor, SimpleLogger, ButtonNameToCommandMapper, ToggleButtonNameToHandlerMapper, this, verifyAndSetHandler, selectorHandler, communicator, MethodNamesFromStackFramesExtractor);
     }
 
     public ITashTaskHandlingStatus<ApplicationModel> CreateTashTaskHandlingStatus() {

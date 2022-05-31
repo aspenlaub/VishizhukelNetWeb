@@ -4,12 +4,12 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
-using Microsoft.Extensions.Logging;
 using Microsoft.Web.WebView2.Wpf;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.GUI;
@@ -18,10 +18,12 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     : GuiAndApplicationSynchronizerBase<TModel, TWindow>, IGuiAndWebViewApplicationSynchronizer<TModel>
     where TModel : class, IWebViewApplicationModelBase {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
+    protected readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
 
-    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger)
+    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
             : base(model, window, simpleLogger) {
-        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger);
+        MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
+        WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger, MethodNamesFromStackFramesExtractor);
     }
 
     protected override async Task UpdateFieldIfNecessaryAsync(FieldInfo windowField, PropertyInfo modelProperty) {
@@ -38,6 +40,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
 
     private async Task UpdateWebViewIfNecessaryAsync(IWebView modelWebView, WebView2 webView2) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(UpdateWebViewIfNecessaryAsync), SimpleLogger.LogId))) {
+            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             if (modelWebView == null) {
                 throw new ArgumentNullException(nameof(modelWebView));
             }
@@ -47,7 +50,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
             }
 
             modelWebView.LastUrl = modelWebView.Url;
-            SimpleLogger.LogInformation($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'");
+            SimpleLogger.LogInformationWithCallStack($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'", methodNamesFromStack);
             var minLastUpdateTime = DateTime.Now;
             webView2.CoreWebView2?.Navigate(modelWebView.Url);
 
@@ -57,20 +60,21 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement) where TResult : IScriptCallResponse, new() {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync) + "Base", SimpleLogger.LogId))) {
-            SimpleLogger.LogInformation(Properties.Resources.ExecutingScript);
+            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            SimpleLogger.LogInformationWithCallStack(Properties.Resources.ExecutingScript, methodNamesFromStack);
             var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
             var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
                 ? null
                 : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
             if (webView2 == null) {
-                SimpleLogger.LogInformation(Properties.Resources.UiDoesNotContainAWebView);
+                SimpleLogger.LogInformationWithCallStack(Properties.Resources.UiDoesNotContainAWebView, methodNamesFromStack);
                 return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.UiDoesNotContainAWebView });
             }
 
             var json = await webView2.CoreWebView2.ExecuteScriptAsync(scriptStatement.Statement);
-            SimpleLogger.LogInformation(Properties.Resources.ScriptExecutedDeserializingResult);
+            SimpleLogger.LogInformationWithCallStack(Properties.Resources.ScriptExecutedDeserializingResult, methodNamesFromStack);
             if (string.IsNullOrEmpty(json)) {
-                SimpleLogger.LogInformation(Properties.Resources.ScriptCallJsonResultIsEmpty);
+                SimpleLogger.LogInformationWithCallStack(Properties.Resources.ScriptCallJsonResultIsEmpty, methodNamesFromStack);
                 return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.ScriptCallJsonResultIsEmpty });
             }
 
@@ -84,7 +88,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
             } catch {
             }
 
-            SimpleLogger.LogInformation(Properties.Resources.CouldNotDeserializeScriptCallJsonResult);
+            SimpleLogger.LogInformationWithCallStack(Properties.Resources.CouldNotDeserializeScriptCallJsonResult, methodNamesFromStack);
             return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.CouldNotDeserializeScriptCallJsonResult });
         }
     }
