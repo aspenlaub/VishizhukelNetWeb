@@ -24,7 +24,7 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
     }
 
     public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, DateTime minLastUpdateTime) {
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync), SimpleLogger.LogId))) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.CreateWithRandomId(nameof(WaitUntilNotNavigatingAnymoreAsync)))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             if (Model.WebView is { IsWired: false }) {
                 Model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
