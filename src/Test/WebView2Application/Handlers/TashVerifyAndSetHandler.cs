@@ -9,12 +9,12 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
 
 public class TashVerifyAndSetHandler : TashVerifyAndSetHandlerBase<IApplicationModel> {
     // ReSharper disable once NotAccessedField.Local
-    private readonly IApplicationHandlers ApplicationHandlers;
+    private readonly IApplicationHandlers _ApplicationHandlers;
 
     public TashVerifyAndSetHandler(IApplicationHandlers applicationHandlers, ISimpleLogger simpleLogger, ITashSelectorHandler<IApplicationModel> tashSelectorHandler,
         ITashCommunicator<IApplicationModel> tashCommunicator, Dictionary<string, ISelector> selectors, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
         : base(simpleLogger, tashSelectorHandler, tashCommunicator, selectors, methodNamesFromStackFramesExtractor) {
-        ApplicationHandlers = applicationHandlers;
+        _ApplicationHandlers = applicationHandlers;
     }
 
     protected override Dictionary<string, ITextBox> TextBoxNamesToTextBoxDictionary(ITashTaskHandlingStatus<IApplicationModel> status) {
@@ -26,7 +26,7 @@ public class TashVerifyAndSetHandler : TashVerifyAndSetHandlerBase<IApplicationM
 
     protected override Dictionary<string, ISimpleTextHandler> TextBoxNamesToTextHandlerDictionary(ITashTaskHandlingStatus<IApplicationModel> status) {
         return new() {
-            { nameof(status.Model.WebViewUrl), ApplicationHandlers.WebViewUrlTextHandler }
+            { nameof(status.Model.WebViewUrl), _ApplicationHandlers.WebViewUrlTextHandler }
         };
     }
 

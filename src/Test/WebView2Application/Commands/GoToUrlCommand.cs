@@ -5,24 +5,24 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Int
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Commands;
 
 public class GoToUrlCommand : ICommand {
-    private readonly IApplicationModel Model;
-    private readonly IWebViewNavigationHelper WebViewNavigationHelper;
+    private readonly IApplicationModel _Model;
+    private readonly IWebViewNavigationHelper _WebViewNavigationHelper;
 
     public GoToUrlCommand(IApplicationModel model, IWebViewNavigationHelper webViewNavigationHelper) {
-        Model = model;
-        WebViewNavigationHelper = webViewNavigationHelper;
+        _Model = model;
+        _WebViewNavigationHelper = webViewNavigationHelper;
     }
 
     public async Task ExecuteAsync() {
-        if (!Model.GoToUrl.Enabled) {
+        if (!_Model.GoToUrl.Enabled) {
             return;
         }
 
-        await WebViewNavigationHelper.NavigateToUrlAsync(Model.WebViewUrl.Text);
+        await _WebViewNavigationHelper.NavigateToUrlAsync(_Model.WebViewUrl.Text);
     }
 
     public async Task<bool> ShouldBeEnabledAsync() {
-        var enabled = Model.WebViewUrl.Text.StartsWith("http", StringComparison.InvariantCulture);
+        var enabled = _Model.WebViewUrl.Text.StartsWith("http", StringComparison.InvariantCulture);
         return await Task.FromResult(enabled);
     }
 }

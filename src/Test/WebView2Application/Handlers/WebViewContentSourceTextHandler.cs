@@ -4,19 +4,19 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Ent
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Handlers;
 
 internal class WebViewContentSourceTextHandler : ISimpleTextHandler {
-    private readonly ApplicationModel Model;
-    private readonly IGuiAndAppHandler<ApplicationModel> GuiAndAppHandler;
+    private readonly ApplicationModel _Model;
+    private readonly IGuiAndAppHandler<ApplicationModel> _GuiAndAppHandler;
 
     public WebViewContentSourceTextHandler(ApplicationModel model, IGuiAndAppHandler<ApplicationModel> guiAndAppHandler) {
-        Model = model;
-        GuiAndAppHandler = guiAndAppHandler;
+        _Model = model;
+        _GuiAndAppHandler = guiAndAppHandler;
     }
 
     public async Task TextChangedAsync(string text) {
-        if (Model.WebViewContentSource.Text == text) { return; }
+        if (_Model.WebViewContentSource.Text == text) { return; }
 
-        Model.WebViewContentSource.Text = text;
+        _Model.WebViewContentSource.Text = text;
 
-        await GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+        await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
     }
 }

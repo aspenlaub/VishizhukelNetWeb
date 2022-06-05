@@ -7,26 +7,26 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Tes
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Handlers;
 
 public class TestCaseSelectorHandler : ITestCaseSelectorHandler {
-    private readonly IApplicationModel Model;
-    private readonly IGuiAndWebViewAppHandler<ApplicationModel> GuiAndAppHandler;
+    private readonly IApplicationModel _Model;
+    private readonly IGuiAndWebViewAppHandler<ApplicationModel> _GuiAndAppHandler;
 
     public TestCaseSelectorHandler(IApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler) {
-        Model = model;
-        GuiAndAppHandler = guiAndAppHandler;
+        _Model = model;
+        _GuiAndAppHandler = guiAndAppHandler;
     }
 
     public async Task UpdateSelectableTestCasesAsync() {
         var testCases = AllTestCases.Instance;
         var selectables = new List<Selectable>();
         selectables.AddRange(testCases.Select(t => new Selectable { Guid = t.Guid, Name = t.Name }));
-        Model.SelectedTestCase.UpdateSelectables(selectables);
-        await GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+        _Model.SelectedTestCase.UpdateSelectables(selectables);
+        await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
     }
 
     public async Task TestCasesSelectedIndexChangedAsync(int selectedIndex, bool selectablesChanged) {
-        if (Model.SelectedTestCase.SelectedIndex == selectedIndex) { return; }
+        if (_Model.SelectedTestCase.SelectedIndex == selectedIndex) { return; }
 
-        Model.SelectedTestCase.SelectedIndex = selectedIndex;
-        await GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+        _Model.SelectedTestCase.SelectedIndex = selectedIndex;
+        await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
     }
 }

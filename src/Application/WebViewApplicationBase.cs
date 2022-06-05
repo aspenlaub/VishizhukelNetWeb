@@ -81,7 +81,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
                 return scriptCallResponse;
             }
 
-            if ((scriptCallResponse.Success.YesNo && maySucceed) || (!scriptCallResponse.Success.YesNo && mayFail)) {
+            if (scriptCallResponse.Success.YesNo && maySucceed || !scriptCallResponse.Success.YesNo && mayFail) {
                 return scriptCallResponse;
             }
 

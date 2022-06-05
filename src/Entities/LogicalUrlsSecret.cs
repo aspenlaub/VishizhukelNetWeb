@@ -3,8 +3,8 @@
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 
 public class LogicalUrlsSecret : ISecret<LogicalUrls> {
-    private LogicalUrls LogicalFolders;
-    public LogicalUrls DefaultValue => LogicalFolders ??= new LogicalUrls {
+    private LogicalUrls _LogicalFolders;
+    public LogicalUrls DefaultValue => _LogicalFolders ??= new LogicalUrls {
         new() { Name = "Localhost", Url = "http://localhost" }
     };
 

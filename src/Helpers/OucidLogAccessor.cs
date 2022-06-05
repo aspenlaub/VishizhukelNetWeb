@@ -11,17 +11,17 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 
 public class OucidLogAccessor : IOucidLogAccessor {
-    private readonly IFolderResolver FolderResolver;
+    private readonly IFolderResolver _FolderResolver;
     protected IFolder OucidLogFolder;
 
     public OucidLogAccessor(IFolderResolver folderResolver) {
-        FolderResolver = folderResolver;
+        _FolderResolver = folderResolver;
     }
 
     protected async Task<bool> SetOucidLogFolderIfNecessaryAsync(IErrorsAndInfos errorsAndInfos) {
         if (OucidLogFolder != null) { return true; }
 
-        OucidLogFolder = await FolderResolver.ResolveAsync(@"$(OucidLog)", errorsAndInfos);
+        OucidLogFolder = await _FolderResolver.ResolveAsync(@"$(OucidLog)", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) { return false; }
 
         OucidLogFolder.CreateIfNecessary();

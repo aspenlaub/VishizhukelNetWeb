@@ -23,9 +23,9 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
 public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
     private static IContainer Container { get; set; }
 
-    private Application.Application Application;
-    private ApplicationModel ApplicationModel;
-    private ITashTimer<ApplicationModel> TashTimer;
+    private Application.Application _Application;
+    private ApplicationModel _ApplicationModel;
+    private ITashTimer<ApplicationModel> _TashTimer;
 
     public bool IsWindowUnderTest { get; set; }
 
@@ -53,22 +53,22 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
     private async void OnLoadedAsync(object sender, RoutedEventArgs e) {
         await BuildContainerIfNecessaryAsync();
 
-        Application = Container.Resolve<Application.Application>();
-        ApplicationModel = Container.Resolve<ApplicationModel>();
+        _Application = Container.Resolve<Application.Application>();
+        _ApplicationModel = Container.Resolve<ApplicationModel>();
 
         const string url = "https://www.viperfisch.de/js/bootstrap.min-v24070.js";
-        ApplicationModel.WebView
+        _ApplicationModel.WebView
             .OnDocumentLoaded.AppendStatement($"var script = document.createElement(\"script\"); script.src = \"{url}\"; document.head.appendChild(script);");
 
-        await Application.OnLoadedAsync();
+        await _Application.OnLoadedAsync();
 
-        var commands = Application.Commands;
+        var commands = _Application.Commands;
 
         var guiToAppGate = Container.Resolve<IGuiToWebViewApplicationGate>();
         var buttonNameToCommandMapper = Container.Resolve<IButtonNameToCommandMapper>();
 
-        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewUrl, t => Application.Handlers.WebViewUrlTextHandler.TextChangedAsync(t));
-        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewContentSource, t => Application.Handlers.WebViewContentSourceTextHandler.TextChangedAsync(t));
+        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewUrl, t => _Application.Handlers.WebViewUrlTextHandler.TextChangedAsync(t));
+        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewContentSource, t => _Application.Handlers.WebViewContentSourceTextHandler.TextChangedAsync(t));
 
         guiToAppGate.WireButtonAndCommand(GoToUrl, commands.GoToUrlCommand, buttonNameToCommandMapper);
         guiToAppGate.WireButtonAndCommand(RunJs, commands.RunJsCommand, buttonNameToCommandMapper);
@@ -76,38 +76,38 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
 
         guiToAppGate.WireWebView(WebView);
 
-        var handlers = Application.Handlers;
+        var handlers = _Application.Handlers;
         guiToAppGate.RegisterAsyncSelectorCallback(SelectedTestCase, i => handlers.TestCaseSelectorHandler.TestCasesSelectedIndexChangedAsync(i, false));
 
         if (IsWindowUnderTest) {
-            TashTimer = new TashTimer<ApplicationModel>(Container.Resolve<ITashAccessor>(), Application.TashHandler, guiToAppGate);
-            if (!await TashTimer.ConnectAndMakeTashRegistrationReturnSuccessAsync(Properties.Resources.WebViewWindowTitle)) {
+            _TashTimer = new TashTimer<ApplicationModel>(Container.Resolve<ITashAccessor>(), _Application.TashHandler, guiToAppGate);
+            if (!await _TashTimer.ConnectAndMakeTashRegistrationReturnSuccessAsync(Properties.Resources.WebViewWindowTitle)) {
                 Close();
             }
 
-            TashTimer.CreateAndStartTimer(Application.CreateTashTaskHandlingStatus());
+            _TashTimer.CreateAndStartTimer(_Application.CreateTashTaskHandlingStatus());
         }
 
         await ExceptionHandler.RunAsync(WindowsApplication.Current, TimeSpan.FromSeconds(5));
     }
 
     public async ValueTask DisposeAsync() {
-        if (TashTimer == null) { return; }
+        if (_TashTimer == null) { return; }
 
-        await TashTimer.StopTimerAndConfirmDeadAsync(false);
+        await _TashTimer.StopTimerAndConfirmDeadAsync(false);
     }
 
     private async void OnClosing(object sender, CancelEventArgs e) {
-        if (TashTimer == null) { return; }
+        if (_TashTimer == null) { return; }
 
         e.Cancel = true;
 
-        await TashTimer.StopTimerAndConfirmDeadAsync(false);
+        await _TashTimer.StopTimerAndConfirmDeadAsync(false);
 
         WindowsApplication.Current.Shutdown();
     }
 
     private void OnStateChanged(object sender, EventArgs e) {
-        Application.OnWindowStateChanged(WindowState);
+        _Application.OnWindowStateChanged(WindowState);
     }
 }

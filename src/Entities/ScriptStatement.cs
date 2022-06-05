@@ -3,12 +3,12 @@
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 
 public class ScriptStatement : IScriptStatement {
-    private string PrivateStatement = "";
+    private string _PrivateStatement = "";
 
     public string Statement {
-        get => PrivateStatement;
+        get => _PrivateStatement;
         set {
-            PrivateStatement = value;
+            _PrivateStatement = value;
             NoSuccessErrorMessage = EnhanceErrorMessageIfNecessary(NoSuccessErrorMessage, Properties.Resources.ScriptCallFailed);
             NoFailureErrorMessage = EnhanceErrorMessageIfNecessary(NoFailureErrorMessage, Properties.Resources.ScriptCallFailureExpected);
         }
@@ -21,7 +21,7 @@ public class ScriptStatement : IScriptStatement {
     private string EnhanceErrorMessageIfNecessary(string errorMessage, string defaultErrorMessage) {
         if (errorMessage != defaultErrorMessage) { return errorMessage; }
 
-        var shortStatement = PrivateStatement;
+        var shortStatement = _PrivateStatement;
         if (shortStatement.Length > 20) {
             shortStatement = shortStatement.Substring(0, 20) + "..";
         }

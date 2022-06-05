@@ -11,49 +11,49 @@ using IWebViewNavigationHelper = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.I
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 
 public class WebViewNavigationHelper<TModel> : IWebViewNavigationHelper where TModel : IWebViewApplicationModelBase {
-    private readonly TModel Model;
-    private readonly ISimpleLogger SimpleLogger;
-    private readonly IGuiAndAppHandler<TModel> GuiAndAppHandler;
-    private readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
-    private readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
+    private readonly TModel _Model;
+    private readonly ISimpleLogger _SimpleLogger;
+    private readonly IGuiAndAppHandler<TModel> _GuiAndAppHandler;
+    private readonly IWebViewNavigatingHelper _WebViewNavigatingHelper;
+    private readonly IMethodNamesFromStackFramesExtractor _MethodNamesFromStackFramesExtractor;
 
     public WebViewNavigationHelper(TModel model, ISimpleLogger simpleLogger, IGuiAndAppHandler<TModel> guiAndAppHandler,
             IWebViewNavigatingHelper webViewNavigatingHelper, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
-        Model = model;
-        SimpleLogger = simpleLogger;
-        GuiAndAppHandler = guiAndAppHandler;
-        WebViewNavigatingHelper = webViewNavigatingHelper;
-        MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
+        _Model = model;
+        _SimpleLogger = simpleLogger;
+        _GuiAndAppHandler = guiAndAppHandler;
+        _WebViewNavigatingHelper = webViewNavigatingHelper;
+        _MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
     }
 
     public async Task<bool> NavigateToUrlAsync(string url) {
-        var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-        SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
+        var methodNamesFromStack = _MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        _SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
-        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, DateTime.MinValue)) {
+        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, DateTime.MinValue)) {
             return false;
         }
 
-        SimpleLogger.LogInformationWithCallStack(Properties.Resources.ResetModelUrlAndSync, methodNamesFromStack);
-        Model.WebView.Url = Urls.AboutBlank;
+        _SimpleLogger.LogInformationWithCallStack(Properties.Resources.ResetModelUrlAndSync, methodNamesFromStack);
+        _Model.WebView.Url = Urls.AboutBlank;
         var minLastUpdateTime = DateTime.Now;
-        await GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+        await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
 
-        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, minLastUpdateTime)) {
+        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, minLastUpdateTime)) {
             return false;
         }
 
-        SimpleLogger.LogInformationWithCallStack(Properties.Resources.SetModelUrlAndAsync, methodNamesFromStack);
-        Model.WebView.Url = url;
+        _SimpleLogger.LogInformationWithCallStack(Properties.Resources.SetModelUrlAndAsync, methodNamesFromStack);
+        _Model.WebView.Url = url;
         minLastUpdateTime = DateTime.Now;
-        await GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+        await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
 
-        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, minLastUpdateTime)) {
+        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, minLastUpdateTime)) {
             return false;
         }
 
-        Model.Status.Text = "";
-        Model.Status.Type = StatusType.None;
+        _Model.Status.Text = "";
+        _Model.Status.Type = StatusType.None;
         return true;
     }
 }

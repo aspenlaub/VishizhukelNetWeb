@@ -8,16 +8,16 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Ent
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Commands;
 
 public class RunJsCommand : ICommand {
-    private readonly ApplicationModel Model;
-    private readonly IGuiAndWebViewAppHandler<ApplicationModel> GuiAndAppHandler;
+    private readonly ApplicationModel _Model;
+    private readonly IGuiAndWebViewAppHandler<ApplicationModel> _GuiAndAppHandler;
 
     public RunJsCommand(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler) {
-        Model = model;
-        GuiAndAppHandler = guiAndAppHandler;
+        _Model = model;
+        _GuiAndAppHandler = guiAndAppHandler;
     }
 
     public async Task ExecuteAsync() {
-        if (!Model.RunJs.Enabled) {
+        if (!_Model.RunJs.Enabled) {
             return;
         }
 
@@ -31,11 +31,11 @@ public class RunJsCommand : ICommand {
         const string inconclusiveErrorMessage = "Script result is inconclusive";
         const string noSuccessErrorMessage = "Script call failed";
         var scriptStatement = new ScriptStatement { Statement = statement, InconclusiveErrorMessage = inconclusiveErrorMessage, NoSuccessErrorMessage = noSuccessErrorMessage };
-        await GuiAndAppHandler.RunScriptAsync<ScriptCallResponseBase>(scriptStatement, false, true);
+        await _GuiAndAppHandler.RunScriptAsync<ScriptCallResponseBase>(scriptStatement, false, true);
     }
 
     public async Task<bool> ShouldBeEnabledAsync() {
-        var enabled = Model.WebViewUrl.Text.StartsWith("http", StringComparison.InvariantCulture);
+        var enabled = _Model.WebViewUrl.Text.StartsWith("http", StringComparison.InvariantCulture);
         return await Task.FromResult(enabled);
     }
 }
