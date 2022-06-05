@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -10,6 +11,7 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.GUI;
@@ -62,13 +64,10 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync) + "Base"))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             SimpleLogger.LogInformationWithCallStack(Properties.Resources.ExecutingScript, methodNamesFromStack);
-            var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
-            var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
-                ? null
-                : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
+            var errorsAndInfos = new ErrorsAndInfos();
+            var webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
             if (webView2 == null) {
-                SimpleLogger.LogInformationWithCallStack(Properties.Resources.UiDoesNotContainAWebView, methodNamesFromStack);
-                return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.UiDoesNotContainAWebView });
+                return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = errorsAndInfos.ErrorsToString() });
             }
 
             var json = await webView2.CoreWebView2.ExecuteScriptAsync(scriptStatement.Statement);
@@ -95,5 +94,47 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
 
     public async Task WaitUntilNotNavigatingAnymoreAsync() {
         await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync("", DateTime.MinValue);
+    }
+
+    public async Task NavigateToUrlAndWaitForStartOfNavigationAsync(string url, IErrorsAndInfos errorsAndInfos) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(NavigateToUrlAndWaitForStartOfNavigationAsync)))) {
+            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            SimpleLogger.LogInformationWithCallStack(Properties.Resources.NavigatingToUrl, methodNamesFromStack);
+            var webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
+            if (webView2 == null) { return; }
+
+            var navigationStarted = false;
+
+            void OnNavigationStarting(object o, CoreWebView2NavigationStartingEventArgs coreWebView2NavigationStartingEventArgs) {
+                navigationStarted = true;
+            }
+
+            webView2.CoreWebView2.NavigationStarting += OnNavigationStarting;
+            webView2.CoreWebView2.Navigate(url);
+            const int maxSeconds = 1;
+            var timeToGiveUp = DateTime.Now.AddSeconds(maxSeconds);
+            while (DateTime.Now < timeToGiveUp && !navigationStarted) {
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
+            }
+            webView2.CoreWebView2.NavigationStarting -= OnNavigationStarting;
+            if (!navigationStarted) {
+                errorsAndInfos.Errors.Add(string.Format(Properties.Resources.NotNavigatingAfterSeconds, maxSeconds));
+            }
+        }
+    }
+
+    private WebView2 GetWebViewControl(IErrorsAndInfos errorsAndInfos, IList<string> methodNamesFromStack) {
+        var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
+        var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
+            ? null
+            : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
+        if (webView2 != null) {
+            return webView2;
+        }
+
+        SimpleLogger.LogInformationWithCallStack(Properties.Resources.UiDoesNotContainAWebView, methodNamesFromStack);
+        errorsAndInfos.Errors.Add(Properties.Resources.UiDoesNotContainAWebView);
+
+        return null;
     }
 }

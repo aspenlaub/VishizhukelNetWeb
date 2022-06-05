@@ -1,4 +1,5 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
+// ReSharper disable UnusedMember.Global
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Extensions;
 

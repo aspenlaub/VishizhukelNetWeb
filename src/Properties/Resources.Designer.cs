@@ -106,6 +106,24 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Navigating to URL and wait for start of navigation.
+        /// </summary>
+        internal static string NavigatingToUrl {
+            get {
+                return ResourceManager.GetString("NavigatingToUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Still not navigating after {0} second/-s.
+        /// </summary>
+        internal static string NotNavigatingAfterSeconds {
+            get {
+                return ResourceManager.GetString("NotNavigatingAfterSeconds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Not navigating anymore.
         /// </summary>
         internal static string NotNavigatingAnymore {

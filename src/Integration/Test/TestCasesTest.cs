@@ -24,6 +24,15 @@ public class TestCasesTest : IntegrationTestBase {
     }
 
     [TestMethod]
+    public async Task CanRunWebViewImprovementTestCases() {
+        var testCaseNames = new List<string> {
+            VishizhukelNetWebTestResources.CanWaitForStartOfNavigationWhenGoingToUrl
+        };
+
+        await RunTestCasesAsync(testCaseNames);
+    }
+
+    [TestMethod]
     public async Task CanRunAlwaysFailsTestCase() {
         using var sut = await CreateWindowUnderTestAsync(nameof(VishizhukelNetWebView2Window));
         var process = await sut.FindIdleProcessAsync();

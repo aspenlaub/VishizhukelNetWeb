@@ -144,6 +144,9 @@
   <data name="CanOnlyRunTestCasesWithRealWebView" xml:space="preserve">
     <value>Test cases can only be run using real web view</value>
   </data>
+  <data name="CanWaitForStartOfNavigationWhenGoingToUrl" xml:space="preserve">
+    <value>Can wait for start of navigation when going to url</value>
+  </data>
   <data name="NoResultReceived" xml:space="preserve">
     <value>No result received</value>
   </data>

@@ -8,8 +8,6 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.Runtime.CompilerServices;
-
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
     using System;
     
@@ -140,6 +138,15 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
         internal static string CanOnlyRunTestCasesWithRealWebView {
             get {
                 return ResourceManager.GetString("CanOnlyRunTestCasesWithRealWebView", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can wait for start of navigation when going to url.
+        /// </summary>
+        internal static string CanWaitForStartOfNavigationWhenGoingToUrl {
+            get {
+                return ResourceManager.GetString("CanWaitForStartOfNavigationWhenGoingToUrl", resourceCulture);
             }
         }
         

@@ -1,4 +1,5 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 
@@ -23,6 +24,10 @@ public class FakeGuiAndApplicationSynchronizer : IGuiAndWebViewApplicationSynchr
     }
 
     public async Task WaitUntilNotNavigatingAnymoreAsync() {
+        await Task.CompletedTask;
+    }
+
+    public async Task NavigateToUrlAndWaitForStartOfNavigationAsync(string url, IErrorsAndInfos errorsAndInfos) {
         await Task.CompletedTask;
     }
 }

@@ -94,4 +94,8 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     public async Task WaitUntilNotNavigatingAnymoreAsync() {
         await GuiAndApplicationSynchronizer.WaitUntilNotNavigatingAnymoreAsync();
     }
+
+    public async Task NavigateToUrlAndWaitForStartOfNavigationAsync(string url, IErrorsAndInfos errorsAndInfos) {
+        await GuiAndApplicationSynchronizer.NavigateToUrlAndWaitForStartOfNavigationAsync(url, errorsAndInfos);
+    }
 }
