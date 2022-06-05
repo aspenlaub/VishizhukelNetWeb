@@ -142,6 +142,15 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can use improved navigation to URL.
+        /// </summary>
+        internal static string CanUseImprovedNavigationToUrl {
+            get {
+                return ResourceManager.GetString("CanUseImprovedNavigationToUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Can wait for start of navigation when going to url.
         /// </summary>
         internal static string CanWaitForStartOfNavigationWhenGoingToUrl {

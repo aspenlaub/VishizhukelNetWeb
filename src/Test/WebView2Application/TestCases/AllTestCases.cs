@@ -6,6 +6,7 @@ public class AllTestCases {
     public static IList<ITestCase> Instance { get; } = new List<ITestCase> {
         new AlwaysSucceeds(), new AlwaysFails(),
         new CanFindLamasMainByClass(), new CannotFindAnchorWhichIsNotDivLike(),
-        new CanFindBody(), new CanFindAnchor(), new CanWaitForStartOfNavigationWhenGoingToUrl()
+        new CanFindBody(), new CanFindAnchor(), new CanWaitForStartOfNavigationWhenGoingToUrl(),
+        new CanUseImprovedNavigationToUrl()
     };
 }
