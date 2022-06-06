@@ -41,9 +41,13 @@ public class IntegrationTestBase {
     protected static void VerifyThatEachExpectedLineIsInReducedLog(List<string> expectedLines, IReadOnlyCollection<ISimpleLogEntry> reducedActualLogEntries, IReadOnlyList<ISimpleLogEntry> actualLogEntries) {
         foreach (var expectedLine in expectedLines) {
             var logEntry = reducedActualLogEntries.FirstOrDefault(l => l.Message.Contains(expectedLine));
-            var index = actualLogEntries.Select((l, x) => new Tuple<string, int>(l.Message, x)).Where(t => t.Item1.Contains(expectedLine)).Select(t => t.Item2).First();
-            var scopes = actualLogEntries[index].Stack;
-            Assert.IsNotNull(logEntry, $"Line \"{expectedLine}\" not found in reduced list of log entries, scopes are {string.Join(';', scopes)}");
+            var index = actualLogEntries.Select((l, x) => new Tuple<string, int>(l.Message, x)).Where(t => t.Item1.Contains(expectedLine)).Select(t => t.Item2).FirstOrDefault();
+            if (index >= 0) {
+                var scopes = actualLogEntries[index].Stack;
+                Assert.IsNotNull(logEntry, $"Line \"{expectedLine}\" not found in reduced list of log entries, scopes are {string.Join(';', scopes)}");
+            } else {
+                Assert.IsNotNull(logEntry, $"Line \"{expectedLine}\" not found in reduced list of log entries");
+            }
         }
     }
 }

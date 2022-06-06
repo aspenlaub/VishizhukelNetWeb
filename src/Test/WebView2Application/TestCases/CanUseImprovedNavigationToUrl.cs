@@ -20,7 +20,7 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
             var url = await logicalUrlRepository.GetUrlAsync("Rhönlamas", errorsAndInfos);
             if (errorsAndInfos.AnyErrors()) { return errorsAndInfos; }
 
-            await helper.NavigateToUrlImprovedAsync(url);
+            await helper.NavigateToUrlAsync(url);
 
             errorsAndInfos.Infos.Add(Properties.Resources.TestCaseSucceeded);
             return errorsAndInfos;

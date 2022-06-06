@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
@@ -31,42 +30,11 @@ public class WebViewNavigationHelper<TModel> : IWebViewNavigationHelper where TM
         var methodNamesFromStack = _MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         _SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
-        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, DateTime.MinValue)) {
+        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
             return false;
         }
 
-        _SimpleLogger.LogInformationWithCallStack(Properties.Resources.ResetModelUrlAndSync, methodNamesFromStack);
-        _Model.WebView.Url = Urls.AboutBlank;
-        var minLastUpdateTime = DateTime.Now;
-        await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
-
-        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, minLastUpdateTime)) {
-            return false;
-        }
-
-        _SimpleLogger.LogInformationWithCallStack(Properties.Resources.SetModelUrlAndAsync, methodNamesFromStack);
-        _Model.WebView.Url = url;
-        minLastUpdateTime = DateTime.Now;
-        await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
-
-        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, minLastUpdateTime)) {
-            return false;
-        }
-
-        _Model.Status.Text = "";
-        _Model.Status.Type = StatusType.None;
-        return true;
-    }
-
-    public async Task<bool> NavigateToUrlImprovedAsync(string url) {
-        var methodNamesFromStack = _MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-        _SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
-
-        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, DateTime.MinValue)) {
-            return false;
-        }
-
-        _SimpleLogger.LogInformationWithCallStack(Properties.Resources.NavigatingToUrl, methodNamesFromStack);
+        _SimpleLogger.LogInformationWithCallStack(string.Format(Properties.Resources.NavigatingToUrl, url), methodNamesFromStack);
         var errorsAndInfos = new ErrorsAndInfos();
         await _GuiAndAppHandler.NavigateToUrlAndWaitForStartOfNavigationAsync(url, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
@@ -75,7 +43,7 @@ public class WebViewNavigationHelper<TModel> : IWebViewNavigationHelper where TM
 
         await _GuiAndAppHandler.EnableOrDisableButtonsThenSyncGuiAndAppAsync();
 
-        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, DateTime.MinValue)) {
+        if (!await _WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
             return false;
         }
 

@@ -6,7 +6,8 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.GUI
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application;
 
 public class GuiAndApplicationSynchronizer : GuiAndWebViewApplicationSynchronizerBase<ApplicationModel, VishizhukelNetWebView2Window> {
-    public GuiAndApplicationSynchronizer(ApplicationModel model, VishizhukelNetWebView2Window window, ISimpleLogger simpleLogger, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
+    public GuiAndApplicationSynchronizer(ApplicationModel model, VishizhukelNetWebView2Window window, ISimpleLogger simpleLogger,
+                    IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
             : base(model, window, simpleLogger, methodNamesFromStackFramesExtractor) {
     }
 }

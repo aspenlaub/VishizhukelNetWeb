@@ -23,7 +23,7 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
         _MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
     }
 
-    public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, DateTime minLastUpdateTime) {
+    public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url) {
         using (_SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync)))) {
             var methodNamesFromStack = _MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             if (_Model.WebView is { IsWired: false }) {
@@ -34,11 +34,11 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
             }
 
             _SimpleLogger.LogInformationWithCallStack(Properties.Resources.WaitUntilNotNavigatingAnymore, methodNamesFromStack);
-            await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, QuickSeconds, IntervalInMilliseconds, DoubleCheckIntervalInMilliseconds);
+            await WaitUntilNotNavigatingAnymoreAsync(QuickSeconds, IntervalInMilliseconds, DoubleCheckIntervalInMilliseconds);
 
             if (_Model.WebView.IsNavigating) {
                 _SimpleLogger.LogInformationWithCallStack(Properties.Resources.WaitLongerUntilNotNavigatingAnymore, methodNamesFromStack);
-                await WaitUntilNotNavigatingAnymoreAsync(minLastUpdateTime, MaxSeconds - QuickSeconds, LargeIntervalInMilliseconds, DoubleCheckLargeIntervalInMilliseconds);
+                await WaitUntilNotNavigatingAnymoreAsync(MaxSeconds - QuickSeconds, LargeIntervalInMilliseconds, DoubleCheckLargeIntervalInMilliseconds);
             }
 
             if (!_Model.WebView.IsNavigating) {
@@ -53,12 +53,12 @@ public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
         }
     }
 
-    private async Task WaitUntilNotNavigatingAnymoreAsync(DateTime minLastUpdateTime, int seconds, int intervalInMilliseconds, int doubleCheckIntervalInMilliseconds) {
+    private async Task WaitUntilNotNavigatingAnymoreAsync(int seconds, int intervalInMilliseconds, int doubleCheckIntervalInMilliseconds) {
         var attempts = seconds * 1000 / intervalInMilliseconds;
         bool again;
         var methodNamesFromStack = _MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         do {
-            while ((_Model.WebView.LastNavigationStartedAt < minLastUpdateTime || _Model.WebView.IsNavigating) && attempts > 0) {
+            while (_Model.WebView.IsNavigating && attempts > 0) {
                 await Task.Delay(TimeSpan.FromMilliseconds(intervalInMilliseconds));
                 attempts--;
                 if (attempts == 0) {

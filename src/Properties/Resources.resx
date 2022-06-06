@@ -133,7 +133,7 @@
     <value>Navigating again</value>
   </data>
   <data name="NavigatingToUrl" xml:space="preserve">
-    <value>Navigating to URL and wait for start of navigation</value>
+    <value>Navigating to URL '{0}' and wait for start of navigation</value>
   </data>
   <data name="NotNavigatingAfterSeconds" xml:space="preserve">
     <value>Still not navigating after {0} second/-s</value>

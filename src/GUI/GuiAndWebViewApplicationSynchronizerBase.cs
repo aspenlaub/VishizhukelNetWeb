@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
@@ -31,8 +32,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     protected override async Task UpdateFieldIfNecessaryAsync(FieldInfo windowField, PropertyInfo modelProperty) {
         switch (windowField.FieldType.Name) {
             case "WebView2":
-                await UpdateWebViewIfNecessaryAsync((IWebView)modelProperty.GetValue(Model),
-                    (WebView2)windowField.GetValue(Window));
+                await UpdateWebViewIfNecessaryAsync((IWebView)modelProperty.GetValue(Model));
                 break;
             default:
                 await base.UpdateFieldIfNecessaryAsync(windowField, modelProperty);
@@ -40,7 +40,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         }
     }
 
-    private async Task UpdateWebViewIfNecessaryAsync(IWebView modelWebView, WebView2 webView2) {
+    private async Task UpdateWebViewIfNecessaryAsync(IWebView modelWebView) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(UpdateWebViewIfNecessaryAsync)))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             if (modelWebView == null) {
@@ -53,10 +53,15 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
 
             modelWebView.LastUrl = modelWebView.Url;
             SimpleLogger.LogInformationWithCallStack($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'", methodNamesFromStack);
-            var minLastUpdateTime = DateTime.Now;
-            webView2.CoreWebView2?.Navigate(modelWebView.Url);
+            var errorsAndInfos = new ErrorsAndInfos();
+            await NavigateToUrlAndWaitForStartOfNavigationAsync(modelWebView.Url, errorsAndInfos);
+            if (errorsAndInfos.AnyErrors()) {
+                Model.Status.Type = StatusType.Error;
+                Model.Status.Text = errorsAndInfos.ErrorsToString();
+                return;
+            }
 
-            await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(modelWebView.LastUrl, minLastUpdateTime);
+            await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(modelWebView.LastUrl);
         }
     }
 
@@ -93,7 +98,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     public async Task WaitUntilNotNavigatingAnymoreAsync() {
-        await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync("", DateTime.MinValue);
+        await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync("");
     }
 
     public async Task NavigateToUrlAndWaitForStartOfNavigationAsync(string url, IErrorsAndInfos errorsAndInfos) {

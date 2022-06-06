@@ -106,7 +106,7 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Navigating to URL and wait for start of navigation.
+        ///   Looks up a localized string similar to Navigating to URL &apos;{0}&apos; and wait for start of navigation.
         /// </summary>
         internal static string NavigatingToUrl {
             get {
