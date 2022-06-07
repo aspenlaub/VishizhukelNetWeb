@@ -11,7 +11,6 @@ using IScriptCallResponse = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interf
 using IScriptStatement = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptStatement;
 using IWebViewApplicationModelBase = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewApplicationModelBase;
 using IWebViewNavigatingHelper = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewNavigatingHelper;
-using IWebViewNavigationHelper = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewNavigationHelper;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Application;
 
@@ -20,7 +19,6 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             where TModel : class, IWebViewApplicationModelBase
             where TGuiAndApplicationSynchronizer : Interfaces.IGuiAndWebViewApplicationSynchronizer<TModel> {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
-    protected readonly IWebViewNavigationHelper WebViewNavigationHelper;
     protected readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
 
     protected WebViewApplicationBase(IButtonNameToCommandMapper buttonNameToCommandMapper,
@@ -30,7 +28,6 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger) {
         MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
         WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger, MethodNamesFromStackFramesExtractor);
-        WebViewNavigationHelper = new WebViewNavigationHelper<TModel>(model, simpleLogger, this, WebViewNavigatingHelper, MethodNamesFromStackFramesExtractor);
     }
 
     public override async Task OnLoadedAsync() {
@@ -69,6 +66,34 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
             IndicateBusy(true);
         }
+    }
+
+    public async Task<bool> NavigateToUrlAsync(string url) {
+        var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
+
+        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
+            return false;
+        }
+
+        SimpleLogger.LogInformationWithCallStack(string.Format(Properties.Resources.NavigatingToUrl, url), methodNamesFromStack);
+        var errorsAndInfos = new ErrorsAndInfos();
+        await NavigateToUrlAndWaitForStartOfNavigationAsync(url, errorsAndInfos);
+        if (errorsAndInfos.AnyErrors()) {
+            return false;
+        }
+
+        await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
+
+        await Task.Delay(TimeSpan.FromMilliseconds(100)); // TODO: remove again (properly wait for the initial navigation to complete
+
+        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
+            return false;
+        }
+
+        Model.Status.Text = "";
+        Model.Status.Type = StatusType.None;
+        return true;
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement, bool mayFail, bool maySucceed) where TResult : IScriptCallResponse, new() {

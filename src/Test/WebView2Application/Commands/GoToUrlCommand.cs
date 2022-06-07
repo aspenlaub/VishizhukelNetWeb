@@ -1,16 +1,17 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Interfaces;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Commands;
 
 public class GoToUrlCommand : ICommand {
     private readonly IApplicationModel _Model;
-    private readonly IWebViewNavigationHelper _WebViewNavigationHelper;
+    private readonly IGuiAndWebViewAppHandler<ApplicationModel> _GuiAndWebViewAppHandler;
 
-    public GoToUrlCommand(IApplicationModel model, IWebViewNavigationHelper webViewNavigationHelper) {
+    public GoToUrlCommand(IApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndWebViewAppHandler) {
         _Model = model;
-        _WebViewNavigationHelper = webViewNavigationHelper;
+        _GuiAndWebViewAppHandler = guiAndWebViewAppHandler;
     }
 
     public async Task ExecuteAsync() {
@@ -18,7 +19,7 @@ public class GoToUrlCommand : ICommand {
             return;
         }
 
-        await _WebViewNavigationHelper.NavigateToUrlAsync(_Model.WebViewUrl.Text);
+        await _GuiAndWebViewAppHandler.NavigateToUrlAsync(_Model.WebViewUrl.Text);
     }
 
     public async Task<bool> ShouldBeEnabledAsync() {

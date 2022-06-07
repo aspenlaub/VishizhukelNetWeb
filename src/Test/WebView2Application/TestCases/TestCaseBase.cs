@@ -1,6 +1,5 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
-using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 
@@ -14,10 +13,7 @@ public class TestCaseBase {
         var url = await logicalUrlRepository.GetUrlAsync(logicalUrlName, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) { return; }
 
-        var helper = new WebViewNavigationHelper<ApplicationModel>(model, simpleLogger, guiAndAppHandler,
-                                                                   new WebViewNavigatingHelper(model, simpleLogger, methodNamesFromStackFramesExtractor),
-                                                                   methodNamesFromStackFramesExtractor);
         simpleLogger.LogInformationWithCallStack($"Go to '{url}'", methodNamesFromStack);
-        await helper.NavigateToUrlAsync(url);
+        await guiAndAppHandler.NavigateToUrlAsync(url);
     }
 }

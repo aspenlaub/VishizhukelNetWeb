@@ -1,6 +1,5 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
-using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Interfaces;
@@ -13,14 +12,11 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
         public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
                     ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository,
                     IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
-            var helper = new WebViewNavigationHelper<ApplicationModel>(model, simpleLogger, guiAndAppHandler,
-               new WebViewNavigatingHelper(model, simpleLogger, methodNamesFromStackFramesExtractor),
-               methodNamesFromStackFramesExtractor);
             var errorsAndInfos = new ErrorsAndInfos();
             var url = await logicalUrlRepository.GetUrlAsync("Rhönlamas", errorsAndInfos);
             if (errorsAndInfos.AnyErrors()) { return errorsAndInfos; }
 
-            await helper.NavigateToUrlAsync(url);
+            await guiAndAppHandler.NavigateToUrlAsync(url);
 
             errorsAndInfos.Infos.Add(Properties.Resources.TestCaseSucceeded);
             return errorsAndInfos;

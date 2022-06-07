@@ -72,7 +72,7 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
             TestCaseSelectorHandler = new TestCaseSelectorHandler(Model, this)
         };
         Commands = new ApplicationCommands {
-            GoToUrlCommand = new GoToUrlCommand(Model, WebViewNavigationHelper),
+            GoToUrlCommand = new GoToUrlCommand(Model, this),
             RunJsCommand = new RunJsCommand(Model, this),
             RunTestCaseCommand = new RunTestCaseCommand(Model, this, SimpleLogger, _LogicalUrlRepository, MethodNamesFromStackFramesExtractor)
         };
