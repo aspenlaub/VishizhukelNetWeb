@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Components;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Autofac;
@@ -25,6 +26,7 @@ public static class VishizhukelNetWebContainerBuilder {
             await services.UseVishizhukelNetAndPeghAsync(applicationName, csArgumentPrompter);
         }
 
+        services.AddTransient<ILogicalUrlRepository, LogicalUrlRepository>();
         services.AddTransient<IOucidLogAccessor, OucidLogAccessor>();
         return services;
     }
@@ -44,6 +46,7 @@ public static class VishizhukelNetWebContainerBuilder {
             await builder.UseVishizhukelNetAndPeghAsync(applicationName, csArgumentPrompter);
         }
 
+        builder.RegisterType<LogicalUrlRepository>().As<ILogicalUrlRepository>();
         builder.RegisterType<OucidLogAccessor>().As<IOucidLogAccessor>();
         return builder;
     }
