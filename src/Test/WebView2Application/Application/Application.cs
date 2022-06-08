@@ -38,15 +38,20 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
         await Handlers.TestCaseSelectorHandler.UpdateSelectableTestCasesAsync();
 
         var errorsAndInfos = new ErrorsAndInfos();
-        var oustUrl = await _LogicalUrlRepository.GetUrlAsync("Oust", errorsAndInfos);
+        var oustUtilitiesUrl = await _LogicalUrlRepository.GetUrlAsync("OustUtilitiesJs", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             Model.Status.Type = StatusType.Error;
             Model.Status.Text = errorsAndInfos.ErrorsToString();
             return;
         }
 
-        var oustUtilitiesUrl = oustUrl + "oustutilitiesjs.php";
-        var jQueryUrl = oustUrl + "jquery.php";
+        var jQueryUrl = await _LogicalUrlRepository.GetUrlAsync("JQuery", errorsAndInfos);
+        if (errorsAndInfos.AnyErrors()) {
+            Model.Status.Type = StatusType.Error;
+            Model.Status.Text = errorsAndInfos.ErrorsToString();
+            return;
+        }
+
         Model.WebView.OnDocumentLoaded.AppendStatement(
             "var script = document.createElement(\"script\"); "
             + $"script.src = \"{oustUtilitiesUrl}\"; "
