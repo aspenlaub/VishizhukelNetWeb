@@ -10,6 +10,7 @@ using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Microsoft.Web.WebView2.Core;
@@ -54,7 +55,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
             modelWebView.LastUrl = modelWebView.Url;
             SimpleLogger.LogInformationWithCallStack($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'", methodNamesFromStack);
             var errorsAndInfos = new ErrorsAndInfos();
-            await NavigateToUrlAndWaitForStartOfNavigationAsync(modelWebView.Url, errorsAndInfos);
+            await NavigateToUrl(modelWebView.Url, new NavigateToUrlSettings(), errorsAndInfos);
             if (errorsAndInfos.AnyErrors()) {
                 Model.Status.Type = StatusType.Error;
                 Model.Status.Text = errorsAndInfos.ErrorsToString();
@@ -101,8 +102,8 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync("");
     }
 
-    public async Task NavigateToUrlAndWaitForStartOfNavigationAsync(string url, IErrorsAndInfos errorsAndInfos) {
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(NavigateToUrlAndWaitForStartOfNavigationAsync)))) {
+    public async Task NavigateToUrl(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos) {
+        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(NavigateToUrl)))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             SimpleLogger.LogInformationWithCallStack(Properties.Resources.NavigatingToUrl, methodNamesFromStack);
             var webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
@@ -125,6 +126,8 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
             if (!navigationStarted) {
                 errorsAndInfos.Errors.Add(string.Format(Properties.Resources.NotNavigatingAfterSeconds, maxSeconds));
             }
+
+            // if (settings.StopAfterNavigationStarted) { return; }
         }
     }
 

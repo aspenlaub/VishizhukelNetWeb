@@ -6,6 +6,7 @@ using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Application;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using IScriptCallResponse = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptCallResponse;
 using IScriptStatement = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptStatement;
@@ -69,6 +70,11 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task<bool> NavigateToUrlAsync(string url) {
+        var errorsAndInfos = new ErrorsAndInfos();
+        return await NavigateToUrlAsync(url, new NavigateToUrlSettings(), errorsAndInfos);
+    }
+
+    public async Task<bool> NavigateToUrlAsync(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos) {
         var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
@@ -77,10 +83,12 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         }
 
         SimpleLogger.LogInformationWithCallStack(string.Format(Properties.Resources.NavigatingToUrl, url), methodNamesFromStack);
-        var errorsAndInfos = new ErrorsAndInfos();
-        await NavigateToUrlAndWaitForStartOfNavigationAsync(url, errorsAndInfos);
+        await GuiAndApplicationSynchronizer.NavigateToUrl(url, settings, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             return false;
+        }
+        if (settings.StopAfterNavigationStarted) {
+            return true;
         }
 
         await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
@@ -118,9 +126,5 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
 
     public async Task WaitUntilNotNavigatingAnymoreAsync() {
         await GuiAndApplicationSynchronizer.WaitUntilNotNavigatingAnymoreAsync();
-    }
-
-    public async Task NavigateToUrlAndWaitForStartOfNavigationAsync(string url, IErrorsAndInfos errorsAndInfos) {
-        await GuiAndApplicationSynchronizer.NavigateToUrlAndWaitForStartOfNavigationAsync(url, errorsAndInfos);
     }
 }
