@@ -120,6 +120,9 @@
   <data name="AppFailed" xml:space="preserve">
     <value>App failed</value>
   </data>
+  <data name="CouldNotDeserializeOucidResponse" xml:space="preserve">
+    <value>Could not deserialize oucid response</value>
+  </data>
   <data name="CouldNotDeserializeScriptCallJsonResult" xml:space="preserve">
     <value>Could not deserialize script call JSON result</value>
   </data>

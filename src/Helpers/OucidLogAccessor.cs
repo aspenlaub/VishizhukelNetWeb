@@ -46,8 +46,8 @@ public class OucidLogAccessor : IOucidLogAccessor {
         var result = new OucidResponse();
         try {
             result = JsonSerializer.Deserialize<OucidResponses>(await File.ReadAllTextAsync(fileName)).AggregateResponse();
-            // ReSharper disable once EmptyGeneralCatchClause
         } catch {
+            errorsAndInfos.Errors.Add(Properties.Resources.CouldNotDeserializeOucidResponse);
         }
 
         File.Delete(fileName);

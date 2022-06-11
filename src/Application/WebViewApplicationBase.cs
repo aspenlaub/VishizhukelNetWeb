@@ -114,6 +114,10 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             return NavigationResult.Success(errorsAndInfos);
         }
 
+        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
+            return NavigationResult.Failure();
+        }
+
         var oucidAggregatedResponse = await OucidLogAccessor.ReadAndDeleteOucidAsync(oucid, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             SimpleLogger.LogInformationWithCallStack("Error writing to oucid log", methodNamesFromStack);

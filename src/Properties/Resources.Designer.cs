@@ -70,6 +70,15 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not deserialize oucid response.
+        /// </summary>
+        internal static string CouldNotDeserializeOucidResponse {
+            get {
+                return ResourceManager.GetString("CouldNotDeserializeOucidResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not deserialize script call JSON result.
         /// </summary>
         internal static string CouldNotDeserializeScriptCallJsonResult {
