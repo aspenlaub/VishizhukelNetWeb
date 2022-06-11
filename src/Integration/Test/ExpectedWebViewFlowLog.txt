@@ -1,6 +1,4 @@
 ﻿App navigating to 'http://localhost/'
-Wait until not navigating anymore
-Not navigating anymore
 Navigating to URL 'http://localhost/' and wait for start of navigation
 Web view source changes to 'http://localhost/'
 GUI navigating to 'http://localhost/'

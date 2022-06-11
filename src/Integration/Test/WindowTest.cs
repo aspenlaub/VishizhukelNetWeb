@@ -36,7 +36,7 @@ public class WindowTest : IntegrationTestBase {
 
         Assert.AreEqual("Communicating 'Completed' to remote controlling process", actualLines[expectedLines.Count], $"Extra line found: {actualLines[expectedLines.Count]}");
 
-        const int maxSeconds = 3;
+        const double maxSeconds = 1.5;
         var elapsedSeconds = (actualLogEntries[^1].LogTime - actualLogEntries[0].LogTime).TotalSeconds;
         Assert.IsTrue(elapsedSeconds < maxSeconds, $"Expected navigation to take less than {maxSeconds} seconds, it was {elapsedSeconds}");
     }

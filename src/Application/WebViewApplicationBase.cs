@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
@@ -82,7 +81,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
-        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
+        if (Model.WebView.IsNavigating && !await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
             return NavigationResult.Failure();
         }
 
