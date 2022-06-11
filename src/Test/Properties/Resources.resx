@@ -135,6 +135,9 @@
   <data name="CanFindLamasMainByClass" xml:space="preserve">
     <value>Can find Lamas' main by class</value>
   </data>
+  <data name="CanGetOucidResponse" xml:space="preserve">
+    <value>Can get oucid response</value>
+  </data>
   <data name="CannotFindAnchorWhichIsNotDivLike" xml:space="preserve">
     <value>Cannot find anchor (because it is not div-like)</value>
   </data>
@@ -150,8 +153,14 @@
   <data name="CanWaitForStartOfNavigationWhenGoingToUrl" xml:space="preserve">
     <value>Can wait for start of navigation when going to url</value>
   </data>
+  <data name="NoOucidResponseReceived" xml:space="preserve">
+    <value>No oucid response was received</value>
+  </data>
   <data name="NoResultReceived" xml:space="preserve">
     <value>No result received</value>
+  </data>
+  <data name="OucidResponseSaysFurtherAction" xml:space="preserve">
+    <value>Oucid response says further action is required</value>
   </data>
   <data name="ResultIsInconclusive" xml:space="preserve">
     <value>Result is inconclusive</value>

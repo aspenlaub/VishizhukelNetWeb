@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 
@@ -8,11 +7,11 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 
 public interface IGuiAndWebViewAppHandler<out TModel> : IGuiAndAppHandler<TModel> where TModel : IWebViewApplicationModelBase {
-    Task OnWebViewSourceChangedAsync(string uri);
+    Task OnWebViewSourceChangedAsync(string url);
     Task OnWebViewNavigationCompletedAsync(string contentSource, bool isSuccess);
 
-    Task<bool> NavigateToUrlAsync(string url);
-    Task<bool> NavigateToUrlAsync(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos);
+    Task<NavigationResult> NavigateToUrlAsync(string url);
+    Task<NavigationResult> NavigateToUrlAsync(string url, NavigateToUrlSettings settings);
     Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement, bool mayFail, bool maySucceed) where TResult : IScriptCallResponse, new();
 
     Task WaitUntilNotNavigatingAnymoreAsync();

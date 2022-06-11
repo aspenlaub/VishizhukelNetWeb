@@ -115,6 +115,15 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can get oucid response.
+        /// </summary>
+        internal static string CanGetOucidResponse {
+            get {
+                return ResourceManager.GetString("CanGetOucidResponse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot find anchor (because it is not div-like).
         /// </summary>
         internal static string CannotFindAnchorWhichIsNotDivLike {
@@ -160,11 +169,29 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No oucid response was received.
+        /// </summary>
+        internal static string NoOucidResponseReceived {
+            get {
+                return ResourceManager.GetString("NoOucidResponseReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No result received.
         /// </summary>
         internal static string NoResultReceived {
             get {
                 return ResourceManager.GetString("NoResultReceived", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Oucid response says further action is required.
+        /// </summary>
+        internal static string OucidResponseSaysFurtherAction {
+            get {
+                return ResourceManager.GetString("OucidResponseSaysFurtherAction", resourceCulture);
             }
         }
         

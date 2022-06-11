@@ -8,6 +8,7 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using IScriptCallResponse = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptCallResponse;
 using IScriptStatement = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IScriptStatement;
 using IWebViewApplicationModelBase = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IWebViewApplicationModelBase;
@@ -16,19 +17,22 @@ using IWebViewNavigatingHelper = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.I
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Application;
 
 public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TModel>
-        : ApplicationBase<TGuiAndApplicationSynchronizer, TModel>, Interfaces.IGuiAndWebViewAppHandler<TModel>
+        : ApplicationBase<TGuiAndApplicationSynchronizer, TModel>, IGuiAndWebViewAppHandler<TModel>
             where TModel : class, IWebViewApplicationModelBase
-            where TGuiAndApplicationSynchronizer : Interfaces.IGuiAndWebViewApplicationSynchronizer<TModel> {
+            where TGuiAndApplicationSynchronizer : IGuiAndWebViewApplicationSynchronizer<TModel> {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
     protected readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
+    protected readonly IOucidLogAccessor OucidLogAccessor;
 
     protected WebViewApplicationBase(IButtonNameToCommandMapper buttonNameToCommandMapper,
             IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
             TGuiAndApplicationSynchronizer guiAndApplicationSynchronizer, TModel model,
-            ISimpleLogger simpleLogger, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
+            ISimpleLogger simpleLogger, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor,
+            IOucidLogAccessor oucidLogAccessor)
         : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger) {
         MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
         WebViewNavigatingHelper = new WebViewNavigatingHelper(model, simpleLogger, MethodNamesFromStackFramesExtractor);
+        OucidLogAccessor = oucidLogAccessor;
     }
 
     public override async Task OnLoadedAsync() {
@@ -37,16 +41,16 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
     }
 
-    public async Task OnWebViewSourceChangedAsync(string uri) {
+    public async Task OnWebViewSourceChangedAsync(string url) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewSourceChangedAsync)))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            SimpleLogger.LogInformationWithCallStack($"Web view source changes to '{uri}'", methodNamesFromStack);
-            Model.WebView.IsNavigating = uri != null;
-            Model.WebViewUrl.Text = uri ?? "(off road)";
-            Model.WebView.LastNavigationStartedAt = DateTime.Now;
+            var urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(url);
+            SimpleLogger.LogInformationWithCallStack($"Web view source changes to '{urlWithoutOucid}'", methodNamesFromStack);
+            Model.WebView.IsNavigating = url != null;
+            Model.WebViewUrl.Text = urlWithoutOucid ?? "(off road)";
             Model.WebViewContentSource.Text = "";
             await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
-            SimpleLogger.LogInformationWithCallStack($"GUI navigating to '{Model.WebViewUrl.Text}'", methodNamesFromStack);
+            SimpleLogger.LogInformationWithCallStack($"GUI navigating to '{urlWithoutOucid}'", methodNamesFromStack);
             IndicateBusy(true);
         }
     }
@@ -54,7 +58,8 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     public async Task OnWebViewNavigationCompletedAsync(string contentSource, bool isSuccess) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewNavigationCompletedAsync)))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            SimpleLogger.LogInformationWithCallStack($"Web view navigation complete: '{Model.WebViewUrl.Text}'", methodNamesFromStack);
+            var urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(Model.WebViewUrl.Text);
+            SimpleLogger.LogInformationWithCallStack($"Web view navigation complete: '{urlWithoutOucid}'", methodNamesFromStack);
             Model.WebView.IsNavigating = false;
             Model.WebViewContentSource.Text = contentSource;
             Model.WebView.HasValidDocument = isSuccess;
@@ -69,26 +74,56 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         }
     }
 
-    public async Task<bool> NavigateToUrlAsync(string url) {
-        var errorsAndInfos = new ErrorsAndInfos();
-        return await NavigateToUrlAsync(url, new NavigateToUrlSettings(), errorsAndInfos);
+    public async Task<NavigationResult> NavigateToUrlAsync(string url) {
+        return await NavigateToUrlAsync(url, new NavigateToUrlSettings());
     }
 
-    public async Task<bool> NavigateToUrlAsync(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos) {
+    public async Task<NavigationResult> NavigateToUrlAsync(string url, NavigateToUrlSettings settings) {
         var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
         if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
-            return false;
+            return NavigationResult.Failure();
         }
 
-        SimpleLogger.LogInformationWithCallStack(string.Format(Properties.Resources.NavigatingToUrl, url), methodNamesFromStack);
+        var errorsAndInfos = new ErrorsAndInfos();
+        var oucid = await OucidLogAccessor.GenerateOucidAsync(errorsAndInfos);
+        if (errorsAndInfos.AnyErrors()) {
+            SimpleLogger.LogInformationWithCallStack("Error generating oucid and writing to oucid log", methodNamesFromStack);
+            Model.Status.Text = errorsAndInfos.ErrorsToString();
+            Model.Status.Type = StatusType.Error;
+            return NavigationResult.Failure(errorsAndInfos);
+        }
+
+        var urlWithoutOucid = url;
+        url = OucidLogAccessor.AppendOucidToUrl(url, oucid, errorsAndInfos);
+        if (errorsAndInfos.AnyErrors()) {
+            SimpleLogger.LogInformationWithCallStack("Error appending oucid to url", methodNamesFromStack);
+            Model.Status.Text = errorsAndInfos.ErrorsToString();
+            Model.Status.Type = StatusType.Error;
+            return NavigationResult.Failure(errorsAndInfos);
+        }
+
+        SimpleLogger.LogInformationWithCallStack(string.Format(Properties.Resources.NavigatingToUrl, urlWithoutOucid), methodNamesFromStack);
         await GuiAndApplicationSynchronizer.NavigateToUrl(url, settings, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
-            return false;
+            return NavigationResult.Failure(errorsAndInfos);
         }
+
         if (settings.StopAfterNavigationStarted) {
-            return true;
+            return NavigationResult.Success(errorsAndInfos);
+        }
+
+        var oucidAggregatedResponse = await OucidLogAccessor.ReadAndDeleteOucidAsync(oucid, errorsAndInfos);
+        if (errorsAndInfos.AnyErrors()) {
+            SimpleLogger.LogInformationWithCallStack("Error writing to oucid log", methodNamesFromStack);
+            Model.Status.Text = errorsAndInfos.ErrorsToString();
+            Model.Status.Type = StatusType.Error;
+            return NavigationResult.Failure(errorsAndInfos);
+        }
+
+        if (settings.StopAfterOucidResponse) {
+            return NavigationResult.Success(errorsAndInfos, oucidAggregatedResponse);
         }
 
         await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
@@ -96,12 +131,12 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         await Task.Delay(TimeSpan.FromMilliseconds(100)); // TODO: remove again (properly wait for the initial navigation to complete
 
         if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
-            return false;
+            return NavigationResult.Failure();
         }
 
         Model.Status.Text = "";
         Model.Status.Type = StatusType.None;
-        return true;
+        return NavigationResult.Success(errorsAndInfos, oucidAggregatedResponse);
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement, bool mayFail, bool maySucceed) where TResult : IScriptCallResponse, new() {

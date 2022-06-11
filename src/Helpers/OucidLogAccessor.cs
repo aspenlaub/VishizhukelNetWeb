@@ -64,9 +64,16 @@ public class OucidLogAccessor : IOucidLogAccessor {
         return url;
     }
 
+    public string RemoveOucidFromUrl(string url) {
+        if (!url.Contains("oucid")) { return url; }
+
+        var pos = url.IndexOf("oucid=", StringComparison.InvariantCulture);
+        return pos >= 0 ? url[..(pos - 1)] : url;
+    }
+
     public async Task<string> GenerateOucidAsync(IErrorsAndInfos errorsAndInfos) {
         var oucid = Guid.NewGuid().ToString();
-        oucid = oucid.Substring(0, oucid.IndexOf('-'));
+        oucid = oucid[..oucid.IndexOf('-')];
 
         var oucidResponses = new OucidResponses { new() };
 

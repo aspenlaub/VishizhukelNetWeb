@@ -26,7 +26,8 @@ public class TestCasesTest : IntegrationTestBase {
     [TestMethod]
     public async Task CanRunWebViewImprovementTestCases() {
         var testCaseNames = new List<string> {
-            VishizhukelNetWebTestResources.CanWaitForStartOfNavigationWhenGoingToUrl, VishizhukelNetWebTestResources.CanUseImprovedNavigationToUrl
+            VishizhukelNetWebTestResources.CanWaitForStartOfNavigationWhenGoingToUrl, VishizhukelNetWebTestResources.CanUseImprovedNavigationToUrl,
+            VishizhukelNetWebTestResources.CanGetOucidResponse
         };
 
         await RunTestCasesAsync(testCaseNames);

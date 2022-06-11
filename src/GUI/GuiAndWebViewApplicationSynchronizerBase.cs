@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
-using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
@@ -23,46 +22,23 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     where TModel : class, IWebViewApplicationModelBase {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
     protected readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
+    protected readonly IOucidLogAccessor OucidLogAccessor;
 
-    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
-            : base(model, window, simpleLogger) {
+    protected GuiAndWebViewApplicationSynchronizerBase(TModel model, TWindow window, ISimpleLogger simpleLogger,
+                IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor, IOucidLogAccessor oucidLogAccessor)
+                    : base(model, window, simpleLogger) {
         MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
+        OucidLogAccessor = oucidLogAccessor;
         WebViewNavigatingHelper = new WebViewNavigatingHelper(Model, SimpleLogger, MethodNamesFromStackFramesExtractor);
     }
 
     protected override async Task UpdateFieldIfNecessaryAsync(FieldInfo windowField, PropertyInfo modelProperty) {
         switch (windowField.FieldType.Name) {
             case "WebView2":
-                await UpdateWebViewIfNecessaryAsync((IWebView)modelProperty.GetValue(Model));
                 break;
             default:
                 await base.UpdateFieldIfNecessaryAsync(windowField, modelProperty);
                 break;
-        }
-    }
-
-    private async Task UpdateWebViewIfNecessaryAsync(IWebView modelWebView) {
-        using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(UpdateWebViewIfNecessaryAsync)))) {
-            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            if (modelWebView == null) {
-                throw new ArgumentNullException(nameof(modelWebView));
-            }
-
-            if (!modelWebView.IsWired || modelWebView.Url == modelWebView.LastUrl) {
-                return;
-            }
-
-            modelWebView.LastUrl = modelWebView.Url;
-            SimpleLogger.LogInformationWithCallStack($"Calling webView2.CoreWebView2.Navigate with '{modelWebView.Url}'", methodNamesFromStack);
-            var errorsAndInfos = new ErrorsAndInfos();
-            await NavigateToUrl(modelWebView.Url, new NavigateToUrlSettings(), errorsAndInfos);
-            if (errorsAndInfos.AnyErrors()) {
-                Model.Status.Type = StatusType.Error;
-                Model.Status.Text = errorsAndInfos.ErrorsToString();
-                return;
-            }
-
-            await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(modelWebView.LastUrl);
         }
     }
 
@@ -105,7 +81,8 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     public async Task NavigateToUrl(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(NavigateToUrl)))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            SimpleLogger.LogInformationWithCallStack(Properties.Resources.NavigatingToUrl, methodNamesFromStack);
+            var urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(url);
+            SimpleLogger.LogInformationWithCallStack(string.Format(Properties.Resources.NavigatingToUrl, urlWithoutOucid), methodNamesFromStack);
             var webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
             if (webView2 == null) { return; }
 

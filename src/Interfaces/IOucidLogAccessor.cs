@@ -10,5 +10,6 @@ public interface IOucidLogAccessor {
     Task WriteOucidAsync(string oucid, OucidResponses oucidResponses, IErrorsAndInfos errorsAndInfos);
     Task<OucidResponse> ReadAndDeleteOucidAsync(string oucid, IErrorsAndInfos errorsAndInfos);
     string AppendOucidToUrl(string url, string oucid, IErrorsAndInfos errorsAndInfos);
+    string RemoveOucidFromUrl(string url);
     Task<string> GenerateOucidAsync(IErrorsAndInfos errorsAndInfos);
 }

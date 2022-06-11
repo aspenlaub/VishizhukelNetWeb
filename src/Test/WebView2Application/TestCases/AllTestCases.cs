@@ -7,6 +7,6 @@ public class AllTestCases {
         new AlwaysSucceeds(), new AlwaysFails(),
         new CanFindLamasMainByClass(), new CannotFindAnchorWhichIsNotDivLike(),
         new CanFindBody(), new CanFindAnchor(), new CanWaitForStartOfNavigationWhenGoingToUrl(),
-        new CanUseImprovedNavigationToUrl()
+        new CanUseImprovedNavigationToUrl(), new CanGetOucidResponse()
     };
 }

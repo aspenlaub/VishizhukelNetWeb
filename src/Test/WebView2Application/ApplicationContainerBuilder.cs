@@ -2,6 +2,7 @@
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Components;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.GUI;
@@ -25,6 +26,7 @@ public static class ApplicationContainerBuilder {
         builder.RegisterType<ApplicationModel>().As<ApplicationModel>().As<IApplicationModel>().As<IBusy>().SingleInstance();
         builder.RegisterType<GuiToApplicationGate>().As<IGuiToWebViewApplicationGate>().SingleInstance();
         builder.RegisterType<LogicalUrlRepository>().As<ILogicalUrlRepository>().SingleInstance();
+        builder.RegisterType<OucidLogAccessor>().As<IOucidLogAccessor>().SingleInstance();
         return builder;
     }
 }

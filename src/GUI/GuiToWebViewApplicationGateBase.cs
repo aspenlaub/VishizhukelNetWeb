@@ -2,6 +2,7 @@
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Extensions;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.Wpf;
 using IGuiToWebViewApplicationGate = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces.IGuiToWebViewApplicationGate;
@@ -11,9 +12,12 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.GUI;
 
 public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel>
         : GuiToApplicationGateBase<TApplication, TModel>, IGuiToWebViewApplicationGate
-            where TApplication : class, Interfaces.IGuiAndWebViewAppHandler<TModel>
+            where TApplication : class, IGuiAndWebViewAppHandler<TModel>
             where TModel : IWebViewApplicationModelBase {
-    protected GuiToWebViewApplicationGateBase(IBusy busy, TApplication application) : base(busy, application) {
+    protected IOucidLogAccessor OucidLogAccessor;
+
+    protected GuiToWebViewApplicationGateBase(IBusy busy, TApplication application, IOucidLogAccessor oucidLogAccessor) : base(busy, application) {
+        OucidLogAccessor = oucidLogAccessor;
     }
 
     public void WireWebView(WebView2 webView) {
@@ -38,11 +42,12 @@ public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel>
         var webView = sender as WebView2;
         if (webView == null) { return; }
 
-        if (ApplicationModel.WebView.IsNavigating && ApplicationModel.WebView.Url == webView.CoreWebView2.Source) {
+        var sourceWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(webView.CoreWebView2.Source);
+        if (ApplicationModel.WebView.IsNavigating && ApplicationModel.WebViewUrl.Text == OucidLogAccessor.RemoveOucidFromUrl(sourceWithoutOucid)) {
             return;
         }
 
-        await Application.OnWebViewSourceChangedAsync(webView.CoreWebView2.Source);
+        await Application.OnWebViewSourceChangedAsync(sourceWithoutOucid);
     }
 
     private async void OnNavigationCompletedAsync(object sender, CoreWebView2NavigationCompletedEventArgs e) {
