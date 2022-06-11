@@ -29,10 +29,12 @@ public class WindowTest : IntegrationTestBase {
 
         var actualLines = actualLogEntries.Select(l => l.Message).ToList();
 
-        Assert.IsTrue(expectedLines.Count <= actualLines.Count, $"Expected {expectedLines.Count} log lines, got {actualLines.Count}");
+        Assert.IsTrue(expectedLines.Count < actualLines.Count, $"Expected {expectedLines.Count} log lines, got {actualLines.Count}");
         for (var i = 0; i < expectedLines.Count; i++) {
             Assert.AreEqual(expectedLines[i], actualLines[i], $"Difference in log line {i + 1}: expected '{expectedLines[i]}', got '{actualLines[i]}'");
         }
+
+        Assert.AreEqual("Communicating 'Completed' to remote controlling process", actualLines[expectedLines.Count], $"Extra line found: {actualLines[expectedLines.Count]}");
 
         const int maxSeconds = 3;
         var elapsedSeconds = (actualLogEntries[^1].LogTime - actualLogEntries[0].LogTime).TotalSeconds;

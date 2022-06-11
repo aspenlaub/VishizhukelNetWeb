@@ -132,12 +132,6 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
 
         await EnableOrDisableButtonsThenSyncGuiAndAppAsync();
 
-        await Task.Delay(TimeSpan.FromMilliseconds(100)); // TODO: remove again (properly wait for the initial navigation to complete
-
-        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
-            return NavigationResult.Failure();
-        }
-
         Model.Status.Text = "";
         Model.Status.Type = StatusType.None;
         return NavigationResult.Success(errorsAndInfos, oucidAggregatedResponse);
