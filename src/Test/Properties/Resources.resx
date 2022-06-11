@@ -138,6 +138,9 @@
   <data name="CanGetOucidResponse" xml:space="preserve">
     <value>Can get oucid response</value>
   </data>
+  <data name="CanNavigateToUrl" xml:space="preserve">
+    <value>Can navigate to url</value>
+  </data>
   <data name="CannotFindAnchorWhichIsNotDivLike" xml:space="preserve">
     <value>Cannot find anchor (because it is not div-like)</value>
   </data>
@@ -146,9 +149,6 @@
   </data>
   <data name="CanOnlyRunTestCasesWithRealWebView" xml:space="preserve">
     <value>Test cases can only be run using real web view</value>
-  </data>
-  <data name="CanUseImprovedNavigationToUrl" xml:space="preserve">
-    <value>Can use improved navigation to URL</value>
   </data>
   <data name="CanWaitForStartOfNavigationWhenGoingToUrl" xml:space="preserve">
     <value>Can wait for start of navigation when going to url</value>

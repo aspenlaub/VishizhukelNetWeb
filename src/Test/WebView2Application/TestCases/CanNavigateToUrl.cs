@@ -6,9 +6,9 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Int
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.TestCases;
 
-public class CanUseImprovedNavigationToUrl : TestCaseBase, ITestCase {
+public class CanNavigateToUrl : TestCaseBase, ITestCase {
     public string Guid => "426DF59B-4DE6-4D24-8C17-8C034B1B9397";
-    public string Name => Properties.Resources.CanUseImprovedNavigationToUrl;
+    public string Name => Properties.Resources.CanNavigateToUrl;
 
     public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
                                                 ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository,

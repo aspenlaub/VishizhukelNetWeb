@@ -124,6 +124,15 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Can navigate to url.
+        /// </summary>
+        internal static string CanNavigateToUrl {
+            get {
+                return ResourceManager.GetString("CanNavigateToUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot find anchor (because it is not div-like).
         /// </summary>
         internal static string CannotFindAnchorWhichIsNotDivLike {
@@ -147,15 +156,6 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties {
         internal static string CanOnlyRunTestCasesWithRealWebView {
             get {
                 return ResourceManager.GetString("CanOnlyRunTestCasesWithRealWebView", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Can use improved navigation to URL.
-        /// </summary>
-        internal static string CanUseImprovedNavigationToUrl {
-            get {
-                return ResourceManager.GetString("CanUseImprovedNavigationToUrl", resourceCulture);
             }
         }
         
