@@ -41,11 +41,11 @@ public class TestCasesTest : IntegrationTestBase {
         var tasks = new List<ControllableProcessTask> {
             sut.CreateSetValueTask(process, nameof(ApplicationModel.SelectedTestCase), testCaseName),
         };
-        await sut.RemotelyProcessTaskListAsync(process, tasks);
+        await sut.RemotelyProcessTaskListAsync(process, tasks, false, (_, _) => Task.CompletedTask);
         await sut.RemotelyPressButtonAsync(process, nameof(ApplicationModel.RunTestCase), false);
         tasks.Clear();
         tasks.Add(sut.CreateVerifyValueTask(process, nameof(ApplicationModel.Status), testCaseName));
-        await sut.RemotelyProcessTaskListAsync(process, tasks);
+        await sut.RemotelyProcessTaskListAsync(process, tasks, false, (_, _) => Task.CompletedTask);
     }
 
     public async Task RunTestCaseAsync(string testCaseName) {
@@ -61,6 +61,6 @@ public class TestCasesTest : IntegrationTestBase {
             tasks.Add(sut.CreatePressButtonTask(process, nameof(ApplicationModel.RunTestCase)));
         }
 
-        await sut.RemotelyProcessTaskListAsync(process, tasks);
+        await sut.RemotelyProcessTaskListAsync(process, tasks, false, (_, _) => Task.CompletedTask);
     }
 }

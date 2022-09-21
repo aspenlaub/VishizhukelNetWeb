@@ -20,7 +20,7 @@ public class IntegrationTestBase {
         var tasks = new List<ControllableProcessTask> {
             sut.CreateResetTask(process)
         };
-        await sut.RemotelyProcessTaskListAsync(process, tasks);
+        await sut.RemotelyProcessTaskListAsync(process, tasks, false, (_, _) => Task.CompletedTask);
         return sut;
     }
 

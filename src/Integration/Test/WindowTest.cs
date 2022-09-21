@@ -51,7 +51,7 @@ public class WindowTest : IntegrationTestBase {
         var tasks = new List<ControllableProcessTask> {
             sut.CreateSetValueTask(process, nameof(ApplicationModel.WebViewUrl), "http://localhost/"), sut.CreatePressButtonTask(process, nameof(ApplicationModel.GoToUrl))
         };
-        await sut.RemotelyProcessTaskListAsync(process, tasks);
+        await sut.RemotelyProcessTaskListAsync(process, tasks, false, (_, _) => Task.CompletedTask);
     }
 
     private List<string> GetExpectedLines() {
