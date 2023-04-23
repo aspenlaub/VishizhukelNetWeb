@@ -43,6 +43,10 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement) where TResult : IScriptCallResponse, new() {
+        if (scriptStatement == null) {
+            return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = Properties.Resources.NoScriptStatementProvided });
+        }
+
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync) + "Base"))) {
             var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             SimpleLogger.LogInformationWithCallStack(Properties.Resources.ExecutingScript, methodNamesFromStack);
@@ -113,7 +117,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
             ? null
             : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
-        if (webView2 != null) {
+        if (webView2?.CoreWebView2 != null) {
             return webView2;
         }
 

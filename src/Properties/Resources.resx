@@ -138,6 +138,9 @@
   <data name="NavigatingToUrl" xml:space="preserve">
     <value>Navigating to URL '{0}' and wait for start of navigation</value>
   </data>
+  <data name="NoScriptStatementProvided" xml:space="preserve">
+    <value>No script statement was provided</value>
+  </data>
   <data name="NotNavigatingAfterSeconds" xml:space="preserve">
     <value>Still not navigating after {0} second/-s</value>
   </data>

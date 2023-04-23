@@ -124,6 +124,15 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No script statement was provided.
+        /// </summary>
+        internal static string NoScriptStatementProvided {
+            get {
+                return ResourceManager.GetString("NoScriptStatementProvided", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Still not navigating after {0} second/-s.
         /// </summary>
         internal static string NotNavigatingAfterSeconds {
