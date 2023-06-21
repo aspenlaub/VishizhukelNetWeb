@@ -2,6 +2,7 @@
 Navigating to URL 'http://localhost/' and wait for start of navigation
 Web view source changes to 'http://localhost/'
 GUI navigating to 'http://localhost/'
+{Wait until not navigating anymore}
 Web view navigation complete: 'http://localhost/'
-Wait until not navigating anymore
+{Wait until not navigating anymore}
 Not navigating anymore

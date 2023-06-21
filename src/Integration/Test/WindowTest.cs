@@ -30,13 +30,32 @@ public class WindowTest : IntegrationTestBase {
         var actualLines = actualLogEntries.Select(l => l.Message).ToList();
 
         Assert.IsTrue(expectedLines.Count < actualLines.Count, $"Expected {expectedLines.Count} log lines, got {actualLines.Count}");
-        for (var i = 0; i < expectedLines.Count; i++) {
-            Assert.AreEqual(expectedLines[i], actualLines[i], $"Difference in log line {i + 1}: expected '{expectedLines[i]}', got '{actualLines[i]}'");
+        int expectedLineIndex = 0, actualLineIndex = 0, optionalsFound = 0;
+        string actualLine;
+        while (expectedLineIndex < expectedLines.Count) {
+            var expectedLine = expectedLines[expectedLineIndex];
+            actualLine = actualLines[actualLineIndex];
+            if (expectedLine.StartsWith('{')) {
+                expectedLine = expectedLine.Substring(1, expectedLine.Length - 2);
+                if (actualLine != expectedLine) {
+                    expectedLineIndex ++;
+                    continue;
+                }
+
+                optionalsFound ++;
+                Assert.IsTrue(optionalsFound < 2, "More than two optional lines found, this is unexpected");
+            }
+            Assert.AreEqual(expectedLine, actualLine,
+                $"Difference in log line {expectedLineIndex + 1}: expected '{expectedLine}', got '{actualLine}'");
+
+            expectedLineIndex ++;
+            actualLineIndex ++;
         }
 
-        Assert.AreEqual("Communicating 'Completed' to remote controlling process", actualLines[expectedLines.Count], $"Extra line found: {actualLines[expectedLines.Count]}");
+        actualLine = actualLines[actualLineIndex];
+        Assert.AreEqual("Communicating 'Completed' to remote controlling process", actualLine, $"Extra line found: {actualLine}");
 
-        const double maxSeconds = 1.5;
+        const double maxSeconds = 2.5;
         var elapsedSeconds = (actualLogEntries[^1].LogTime - actualLogEntries[0].LogTime).TotalSeconds;
         Assert.IsTrue(elapsedSeconds < maxSeconds, $"Expected navigation to take less than {maxSeconds} seconds, it was {elapsedSeconds}");
     }

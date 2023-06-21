@@ -39,7 +39,7 @@ public class IntegrationTestBase {
     }
 
     protected static void VerifyThatEachExpectedLineIsInReducedLog(List<string> expectedLines, IReadOnlyCollection<ISimpleLogEntry> reducedActualLogEntries, IReadOnlyList<ISimpleLogEntry> actualLogEntries) {
-        foreach (var expectedLine in expectedLines) {
+        foreach (var expectedLine in expectedLines.Where(l => !l.StartsWith('{'))) {
             var logEntry = reducedActualLogEntries.FirstOrDefault(l => l.Message.Contains(expectedLine));
             var index = actualLogEntries.Select((l, x) => new Tuple<string, int>(l.Message, x)).Where(t => t.Item1.Contains(expectedLine)).Select(t => t.Item2).FirstOrDefault();
             if (index >= 0) {
