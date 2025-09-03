@@ -29,9 +29,9 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="MSTest.TestAdapter" Version="3.10.3" />
-    <PackageReference Include="MSTest.TestFramework" Version="3.10.3" />
-    <PackageReference Include="VishnetIntegrationTestTools" Version="2.0.2230.1152" />
+    <PackageReference Include="MSTest.TestAdapter" Version="3.10.4" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.10.4" />
+    <PackageReference Include="VishnetIntegrationTestTools" Version="2.0.2233.1126" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Test\VishizhukelNetWeb.Test.csproj" />
