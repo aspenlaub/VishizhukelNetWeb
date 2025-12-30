@@ -55,6 +55,10 @@ public class OucidLogAccessor(IFolderResolver folderResolver) : IOucidLogAccesso
             return url;
         }
 
+        if (!url.StartsWith("http://localhost")) {
+            return url;
+        }
+
         url = url + (url.Contains('?') ? '&' : '?') + "oucid=" + oucid;
         return url;
     }
