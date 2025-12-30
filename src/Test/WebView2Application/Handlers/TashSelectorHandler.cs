@@ -21,14 +21,14 @@ public class TashSelectorHandler : TashSelectorHandlerBase<IApplicationModel> {
     protected override async Task SelectedIndexChangedAsync(ITashTaskHandlingStatus<IApplicationModel> status, string controlName, int selectedIndex, bool selectablesChanged) {
         if (selectedIndex < 0) { return; }
 
-        var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"Changing selected index for {controlName} to {selectedIndex}", methodNamesFromStack);
         switch (controlName) {
             case nameof(status.Model.SelectedTestCase):
                 await _ApplicationHandlers.TestCaseSelectorHandler.TestCasesSelectedIndexChangedAsync(selectedIndex, selectablesChanged);
                 break;
             default:
-                var errorMessage = $"Do not know how to select for {status.TaskBeingProcessed.ControlName}";
+                string errorMessage = $"Do not know how to select for {status.TaskBeingProcessed.ControlName}";
                 SimpleLogger.LogInformationWithCallStack(
                     $"Communicating 'BadRequest' to remote controlling process ({errorMessage})", methodNamesFromStack);
                 await TashCommunicator.ChangeCommunicateAndShowProcessTaskStatusAsync(status,
@@ -38,22 +38,22 @@ public class TashSelectorHandler : TashSelectorHandlerBase<IApplicationModel> {
     }
 
     public override async Task ProcessSelectComboOrResetTaskAsync(ITashTaskHandlingStatus<IApplicationModel> status) {
-        var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-        var controlName = status.TaskBeingProcessed.ControlName;
+        IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        string controlName = status.TaskBeingProcessed.ControlName;
         if (!Selectors.ContainsKey(controlName)) {
-            var errorMessage = $"Unknown selector control {controlName}";
+            string errorMessage = $"Unknown selector control {controlName}";
             SimpleLogger.LogInformationWithCallStack($"Communicating 'BadRequest' to remote controlling process ({errorMessage})", methodNamesFromStack);
             await TashCommunicator.ChangeCommunicateAndShowProcessTaskStatusAsync(status, ControllableProcessTaskStatus.BadRequest, false, "", errorMessage);
             return;
         }
 
         SimpleLogger.LogInformationWithCallStack($"{controlName} is a valid selector", methodNamesFromStack);
-        var selector = Selectors[controlName];
+        ISelector selector = Selectors[controlName];
 
         await SelectedIndexChangedAsync(status, controlName, -1, false);
         if (status.TaskBeingProcessed.Status == ControllableProcessTaskStatus.BadRequest) { return; }
 
-        var itemToSelect = status.TaskBeingProcessed.Text;
+        string itemToSelect = status.TaskBeingProcessed.Text;
         await SelectItemAsync(status, selector, itemToSelect, controlName);
     }
 }

@@ -14,7 +14,7 @@ public class CanNavigateToUrl : TestCaseBase, ITestCase {
                                                 ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository,
                                                 IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
         var errorsAndInfos = new ErrorsAndInfos();
-        var url = await logicalUrlRepository.GetUrlAsync("Rhönlamas", errorsAndInfos);
+        string url = await logicalUrlRepository.GetUrlAsync("Rhönlamas", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) { return errorsAndInfos; }
 
         await guiAndAppHandler.NavigateToUrlAsync(url);

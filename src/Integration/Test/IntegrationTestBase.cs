@@ -1,22 +1,17 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.Tash;
 using Autofac;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Integration.Test;
 
 public class IntegrationTestBase {
-    protected readonly IContainer Container;
-
-    public IntegrationTestBase() {
-        Container = new ContainerBuilder().RegisterForIntegrationTest().Build();
-    }
+    protected readonly IContainer Container = new ContainerBuilder().RegisterForIntegrationTest().Build();
 
     protected async Task<WindowUnderTest> CreateWindowUnderTestAsync(string windowUnderTestClassName) {
-        var sut = Container.Resolve<WindowUnderTest>();
+        WindowUnderTest sut = Container.Resolve<WindowUnderTest>();
         sut.WindowUnderTestClassName = windowUnderTestClassName;
         await sut.InitializeAsync();
-        var process = await sut.FindIdleProcessAsync();
+        ControllableProcess process = await sut.FindIdleProcessAsync();
         var tasks = new List<ControllableProcessTask> {
             sut.CreateResetTask(process)
         };
@@ -29,9 +24,9 @@ public class IntegrationTestBase {
                                     .Where(f => File.GetLastWriteTime(f) > minChangedAt)
                                     .ToList();
         Assert.IsTrue(logFileNames.Any(), "No log files found");
-        var reader = Container.Resolve<ISimpleLogReader>();
+        ISimpleLogReader reader = Container.Resolve<ISimpleLogReader>();
         var actualLogEntries = new List<ISimpleLogEntry>();
-        foreach (var logFileName in logFileNames) {
+        foreach (string logFileName in logFileNames) {
             actualLogEntries.AddRange(reader.ReadLogFile(logFileName));
         }
 
@@ -39,11 +34,11 @@ public class IntegrationTestBase {
     }
 
     protected static void VerifyThatEachExpectedLineIsInReducedLog(List<string> expectedLines, IReadOnlyCollection<ISimpleLogEntry> reducedActualLogEntries, IReadOnlyList<ISimpleLogEntry> actualLogEntries) {
-        foreach (var expectedLine in expectedLines.Where(l => !l.StartsWith('{'))) {
-            var logEntry = reducedActualLogEntries.FirstOrDefault(l => l.Message.Contains(expectedLine));
-            var index = actualLogEntries.Select((l, x) => new Tuple<string, int>(l.Message, x)).Where(t => t.Item1.Contains(expectedLine)).Select(t => t.Item2).FirstOrDefault();
+        foreach (string expectedLine in expectedLines.Where(l => !l.StartsWith('{'))) {
+            ISimpleLogEntry logEntry = reducedActualLogEntries.FirstOrDefault(l => l.Message.Contains(expectedLine));
+            int index = actualLogEntries.Select((l, x) => new Tuple<string, int>(l.Message, x)).Where(t => t.Item1.Contains(expectedLine)).Select(t => t.Item2).FirstOrDefault();
             if (index >= 0) {
-                var scopes = actualLogEntries[index].Stack;
+                List<string> scopes = actualLogEntries[index].Stack;
                 Assert.IsNotNull(logEntry, $"Line \"{expectedLine}\" not found in reduced list of log entries, scopes are {string.Join(';', scopes)}");
             } else {
                 Assert.IsNotNull(logEntry, $"Line \"{expectedLine}\" not found in reduced list of log entries");

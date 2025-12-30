@@ -42,7 +42,7 @@ public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel>
         var webView = sender as WebView2;
         if (webView == null) { return; }
 
-        var sourceWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(webView.CoreWebView2.Source);
+        string sourceWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(webView.CoreWebView2.Source);
         if (ApplicationModel.WebView.IsNavigating && ApplicationModel.WebViewUrl.Text == OucidLogAccessor.RemoveOucidFromUrl(sourceWithoutOucid)) {
             return;
         }
@@ -60,7 +60,7 @@ public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel>
             await webView.CoreWebView2.ExecuteScriptAsync(ApplicationModel.WebView.OnDocumentLoaded.Statement);
         }
 
-        var source = await webView.CoreWebView2.ExecuteScriptAsync("document.documentElement.innerHTML");
+        string source = await webView.CoreWebView2.ExecuteScriptAsync("document.documentElement.innerHTML");
         source = Regex.Unescape(source);
         source = source.Substring(1, source.Length - 2);
         await Application.OnWebViewNavigationCompletedAsync(source, e.IsSuccess);

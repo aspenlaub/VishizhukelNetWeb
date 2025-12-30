@@ -76,7 +76,7 @@ public static class ScriptCallResponseUtilities {
             };
         }
 
-        var expectedClass = expectedClasses.FirstOrDefault(c => !scriptCallResponse.DomElement.Classes.Contains(c));
+        string expectedClass = expectedClasses.FirstOrDefault(c => !scriptCallResponse.DomElement.Classes.Contains(c));
         if (expectedClass != null) {
             return new ScriptCallResponse {
                 Success = new YesNoInconclusive { Inconclusive = false, YesNo = false },

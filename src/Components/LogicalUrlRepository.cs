@@ -22,7 +22,7 @@ public class LogicalUrlRepository : ILogicalUrlRepository {
 
         if (_NameToUrl == null) {
             var logicalUrlsSecret = new LogicalUrlsSecret();
-            var logicalUrls = await _SecretRepository.GetAsync(logicalUrlsSecret, errorsAndInfos);
+            LogicalUrls logicalUrls = await _SecretRepository.GetAsync(logicalUrlsSecret, errorsAndInfos);
             if (errorsAndInfos.AnyErrors()) { return ""; }
 
             _NameToUrl = logicalUrls.ToDictionary(x => x.Name, x => x.Url);

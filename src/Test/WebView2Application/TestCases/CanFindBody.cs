@@ -22,8 +22,8 @@ public class CanFindBody : TestCaseBase, ITestCase {
         var scriptStatement = new ScriptStatement {
             Statement = "OustOccurrenceFinder.DoesDocumentHaveNthOccurrenceOfIdOrClass(\"body\", 1)"
         };
-        var scriptCallResponse = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, false, true);
-        scriptCallResponse = ScriptCallResponseUtilities.VerifyExpectedClasses(scriptCallResponse, new List<string>(), "body", 1);
+        ScriptCallResponse scriptCallResponse = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, false, true);
+        scriptCallResponse = ScriptCallResponseUtilities.VerifyExpectedClasses(scriptCallResponse, [], "body", 1);
         return ScriptCallResponseUtilities.ToTestRunErrorsAndInfos(scriptCallResponse);
     }
 }

@@ -5,6 +5,6 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
 
 public class ScriptCallResponse : ScriptCallResponseBase {
     public DomElement DomElement { get; set; } = new();
-    public Dictionary<string, string> Dictionary { get; set; } = new();
+    public Dictionary<string, string> Dictionary { get; set; } = [];
     public string InnerHtml { get; set; } = "";
 }

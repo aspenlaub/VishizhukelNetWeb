@@ -9,8 +9,8 @@ public class TestCaseBase {
     protected async Task GoToUrlAsync(string logicalUrlName, ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler,
             ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor,
             IErrorsAndInfos errorsAndInfos) {
-        var methodNamesFromStack = methodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-        var url = await logicalUrlRepository.GetUrlAsync(logicalUrlName, errorsAndInfos);
+        IList<string> methodNamesFromStack = methodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        string url = await logicalUrlRepository.GetUrlAsync(logicalUrlName, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) { return; }
 
         simpleLogger.LogInformationWithCallStack($"Go to '{url}'", methodNamesFromStack);

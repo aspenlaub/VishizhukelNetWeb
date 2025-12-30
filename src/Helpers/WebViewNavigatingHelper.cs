@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
@@ -8,74 +9,66 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 
-public class WebViewNavigatingHelper : IWebViewNavigatingHelper {
+public class WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger,
+        IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
+            : IWebViewNavigatingHelper {
     public const int QuickSeconds = 5, MaxSeconds = 600;
-    private const int IntervalInMilliseconds = 500, LargeIntervalInMilliseconds = 5000;
-    private const int DoubleCheckIntervalInMilliseconds = 200, DoubleCheckLargeIntervalInMilliseconds = 1000;
-
-    private readonly IWebViewApplicationModelBase _Model;
-    private readonly ISimpleLogger _SimpleLogger;
-    private readonly IMethodNamesFromStackFramesExtractor _MethodNamesFromStackFramesExtractor;
-
-    public WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
-        _Model = model;
-        _SimpleLogger = simpleLogger;
-        _MethodNamesFromStackFramesExtractor = methodNamesFromStackFramesExtractor;
-    }
+    private const int _intervalInMilliseconds = 500, _largeIntervalInMilliseconds = 5000;
+    private const int _doubleCheckIntervalInMilliseconds = 200, _doubleCheckLargeIntervalInMilliseconds = 1000;
 
     public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url) {
-        using (_SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync)))) {
-            var methodNamesFromStack = _MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            if (_Model.WebView is { IsWired: false }) {
-                _Model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
-                _Model.Status.Type = StatusType.Error;
-                _SimpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
+        using (simpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync)))) {
+            IList<string> methodNamesFromStack = methodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            if (model.WebView is { IsWired: false }) {
+                model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
+                model.Status.Type = StatusType.Error;
+                simpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
                 return false;
             }
 
-            _SimpleLogger.LogInformationWithCallStack(Properties.Resources.WaitUntilNotNavigatingAnymore, methodNamesFromStack);
-            await WaitUntilNotNavigatingAnymoreAsync(QuickSeconds, IntervalInMilliseconds, DoubleCheckIntervalInMilliseconds);
+            simpleLogger.LogInformationWithCallStack(Properties.Resources.WaitUntilNotNavigatingAnymore, methodNamesFromStack);
+            await WaitUntilNotNavigatingAnymoreAsync(QuickSeconds, _intervalInMilliseconds, _doubleCheckIntervalInMilliseconds);
 
-            if (_Model.WebView.IsNavigating) {
-                _SimpleLogger.LogInformationWithCallStack(Properties.Resources.WaitLongerUntilNotNavigatingAnymore, methodNamesFromStack);
-                await WaitUntilNotNavigatingAnymoreAsync(MaxSeconds - QuickSeconds, LargeIntervalInMilliseconds, DoubleCheckLargeIntervalInMilliseconds);
+            if (model.WebView.IsNavigating) {
+                simpleLogger.LogInformationWithCallStack(Properties.Resources.WaitLongerUntilNotNavigatingAnymore, methodNamesFromStack);
+                await WaitUntilNotNavigatingAnymoreAsync(MaxSeconds - QuickSeconds, _largeIntervalInMilliseconds, _doubleCheckLargeIntervalInMilliseconds);
             }
 
-            if (!_Model.WebView.IsNavigating) {
-                _SimpleLogger.LogInformationWithCallStack(Properties.Resources.NotNavigatingAnymore, methodNamesFromStack);
+            if (!model.WebView.IsNavigating) {
+                simpleLogger.LogInformationWithCallStack(Properties.Resources.NotNavigatingAnymore, methodNamesFromStack);
                 return true;
             }
 
-            _Model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, MaxSeconds);
-            _Model.Status.Type = StatusType.Error;
-            _SimpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
+            model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, MaxSeconds);
+            model.Status.Type = StatusType.Error;
+            simpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
             return false;
         }
     }
 
     private async Task WaitUntilNotNavigatingAnymoreAsync(int seconds, int intervalInMilliseconds, int doubleCheckIntervalInMilliseconds) {
-        var attempts = seconds * 1000 / intervalInMilliseconds;
+        int attempts = seconds * 1000 / intervalInMilliseconds;
         bool again;
-        var methodNamesFromStack = _MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        IList<string> methodNamesFromStack = methodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         do {
-            while (_Model.WebView.IsNavigating && attempts > 0) {
+            while (model.WebView.IsNavigating && attempts > 0) {
                 await Task.Delay(TimeSpan.FromMilliseconds(intervalInMilliseconds));
                 attempts--;
                 if (attempts == 0) {
-                    _SimpleLogger.LogInformationWithCallStack($"Still navigating after {seconds} seconds", methodNamesFromStack);
+                    simpleLogger.LogInformationWithCallStack($"Still navigating after {seconds} seconds", methodNamesFromStack);
                 }
             }
 
             again = false;
-            for (var i = 0; !again && i < 5; i ++) {
+            for (int i = 0; !again && i < 5; i ++) {
                 await Task.Delay(TimeSpan.FromMilliseconds(doubleCheckIntervalInMilliseconds));
                 attempts--;
                 if (attempts == 0) {
-                    _SimpleLogger.LogInformationWithCallStack($"Still navigating after {seconds} seconds", methodNamesFromStack);
+                    simpleLogger.LogInformationWithCallStack($"Still navigating after {seconds} seconds", methodNamesFromStack);
                 }
-                again = _Model.WebView.IsNavigating;
+                again = model.WebView.IsNavigating;
                 if (again) {
-                    _SimpleLogger.LogInformationWithCallStack(Properties.Resources.NavigatingAgain, methodNamesFromStack);
+                    simpleLogger.LogInformationWithCallStack(Properties.Resources.NavigatingAgain, methodNamesFromStack);
                 }
             }
         } while (again && attempts > 0);

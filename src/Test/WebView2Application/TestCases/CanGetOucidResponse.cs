@@ -14,10 +14,10 @@ internal class CanGetOucidResponse : TestCaseBase, ITestCase {
     public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler, ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository,
                                                 IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
         var errorsAndInfos = new ErrorsAndInfos();
-        var url = await logicalUrlRepository.GetUrlAsync("CreateIntegrationTestDatabase", errorsAndInfos);
+        string url = await logicalUrlRepository.GetUrlAsync("CreateIntegrationTestDatabase", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) { return errorsAndInfos; }
 
-        var result = await guiAndAppHandler.NavigateToUrlAsync(url, new NavigateToUrlSettings { StopAfterOucidResponse = true });
+        NavigationResult result = await guiAndAppHandler.NavigateToUrlAsync(url, new NavigateToUrlSettings { StopAfterOucidResponse = true });
         if (!result.Succeeded) { return result.ErrorsAndInfos; }
 
         if (result.OucidResponse == null) {

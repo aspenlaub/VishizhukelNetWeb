@@ -22,8 +22,8 @@ public class CanFindLamasMainByClass : TestCaseBase, ITestCase {
         var scriptStatement = new ScriptStatement {
             Statement = "OustOccurrenceFinder.DoesDocumentHaveDivLikeWithIdOrNthOccurrenceOfClass(\"outrappage\", 1)"
         };
-        var scriptCallResult = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, false, true);
-        scriptCallResult = ScriptCallResponseUtilities.VerifyExpectedClasses(scriptCallResult, new List<string> { "outrappage", "container" }, "outrappage", 1);
+        ScriptCallResponse scriptCallResult = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, false, true);
+        scriptCallResult = ScriptCallResponseUtilities.VerifyExpectedClasses(scriptCallResult, ["outrappage", "container"], "outrappage", 1);
         return ScriptCallResponseUtilities.ToTestRunErrorsAndInfos(scriptCallResult);
     }
 }

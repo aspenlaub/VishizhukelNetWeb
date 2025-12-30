@@ -13,7 +13,7 @@ public class CanWaitForStartOfNavigationWhenGoingToUrl : TestCaseBase, ITestCase
 
     public async Task<IErrorsAndInfos> RunAsync(ApplicationModel model, IGuiAndWebViewAppHandler<ApplicationModel> guiAndAppHandler, ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository,
                                                 IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor) {
-        var result = await guiAndAppHandler.NavigateToUrlAsync("http://localhost", new NavigateToUrlSettings { StopAfterNavigationStarted = true });
+        NavigationResult result = await guiAndAppHandler.NavigateToUrlAsync("http://localhost", new NavigateToUrlSettings { StopAfterNavigationStarted = true });
         if (!result.Succeeded) { return result.ErrorsAndInfos; }
 
         var errorsAndInfos = new ErrorsAndInfos();

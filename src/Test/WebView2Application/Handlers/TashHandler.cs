@@ -20,7 +20,7 @@ public class TashHandler : TashHandlerBase<ApplicationModel> {
     }
 
     protected override async Task ProcessSingleTaskAsync(ITashTaskHandlingStatus<ApplicationModel> status) {
-        var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"Processing a task of type {status.TaskBeingProcessed.Type} in {nameof(TashHandler)}", methodNamesFromStack);
 
         switch (status.TaskBeingProcessed.Type) {

@@ -6,7 +6,7 @@ public class ScriptStatement : IScriptStatement {
     private string _PrivateStatement = "";
 
     public string Statement {
-        get => _PrivateStatement;
+        get { return _PrivateStatement; }
         set {
             _PrivateStatement = value;
             NoSuccessErrorMessage = EnhanceErrorMessageIfNecessary(NoSuccessErrorMessage, Properties.Resources.ScriptCallFailed);
@@ -21,7 +21,7 @@ public class ScriptStatement : IScriptStatement {
     private string EnhanceErrorMessageIfNecessary(string errorMessage, string defaultErrorMessage) {
         if (errorMessage != defaultErrorMessage) { return errorMessage; }
 
-        var shortStatement = _PrivateStatement;
+        string shortStatement = _PrivateStatement;
         if (shortStatement.Length > 20) {
             shortStatement = shortStatement.Substring(0, 20) + "..";
         }

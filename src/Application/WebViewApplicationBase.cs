@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
@@ -42,8 +43,8 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
 
     public async Task OnWebViewSourceChangedAsync(string url) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewSourceChangedAsync)))) {
-            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            var urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(url);
+            IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            string urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(url);
             SimpleLogger.LogInformationWithCallStack($"Web view source changes to '{urlWithoutOucid}'", methodNamesFromStack);
             Model.WebView.IsNavigating = url != null;
             Model.WebViewUrl.Text = urlWithoutOucid ?? "(off road)";
@@ -56,8 +57,8 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
 
     public async Task OnWebViewNavigationCompletedAsync(string contentSource, bool isSuccess) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(OnWebViewNavigationCompletedAsync)))) {
-            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            var urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(Model.WebViewUrl.Text);
+            IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            string urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(Model.WebViewUrl.Text);
             SimpleLogger.LogInformationWithCallStack($"Web view navigation complete: '{urlWithoutOucid}'", methodNamesFromStack);
             Model.WebView.IsNavigating = false;
             Model.WebViewContentSource.Text = contentSource;
@@ -78,7 +79,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task<NavigationResult> NavigateToUrlAsync(string url, NavigateToUrlSettings settings) {
-        var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
         if (Model.WebView.IsNavigating && !await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
@@ -86,7 +87,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         }
 
         var errorsAndInfos = new ErrorsAndInfos();
-        var oucid = await OucidLogAccessor.GenerateOucidAsync(errorsAndInfos);
+        string oucid = await OucidLogAccessor.GenerateOucidAsync(errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             SimpleLogger.LogInformationWithCallStack("Error generating oucid and writing to oucid log", methodNamesFromStack);
             Model.Status.Text = errorsAndInfos.ErrorsToString();
@@ -94,7 +95,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             return NavigationResult.Failure(errorsAndInfos);
         }
 
-        var urlWithoutOucid = url;
+        string urlWithoutOucid = url;
         url = OucidLogAccessor.AppendOucidToUrl(url, oucid, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             SimpleLogger.LogInformationWithCallStack("Error appending oucid to url", methodNamesFromStack);
@@ -117,7 +118,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             return NavigationResult.Failure();
         }
 
-        var oucidAggregatedResponse = await OucidLogAccessor.ReadAndDeleteOucidAsync(oucid, errorsAndInfos);
+        OucidResponse oucidAggregatedResponse = await OucidLogAccessor.ReadAndDeleteOucidAsync(oucid, errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             SimpleLogger.LogInformationWithCallStack("Error writing to oucid log", methodNamesFromStack);
             Model.Status.Text = errorsAndInfos.ErrorsToString();
@@ -138,7 +139,7 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
 
     public async Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement, bool mayFail, bool maySucceed) where TResult : IScriptCallResponse, new() {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync)))) {
-            var scriptCallResponse = await GuiAndApplicationSynchronizer.RunScriptAsync<TResult>(scriptStatement);
+            TResult scriptCallResponse = await GuiAndApplicationSynchronizer.RunScriptAsync<TResult>(scriptStatement);
 
             if (scriptCallResponse.Success.Inconclusive) {
                 Model.Status.Text = string.IsNullOrEmpty(scriptStatement.InconclusiveErrorMessage) ? scriptStatement.NoSuccessErrorMessage : scriptStatement.InconclusiveErrorMessage;

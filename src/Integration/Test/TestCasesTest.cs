@@ -1,7 +1,6 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Tash;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.GUI;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using VishizhukelNetWebTestResources = Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.Properties.Resources;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Integration.Test;
@@ -35,9 +34,9 @@ public class TestCasesTest : IntegrationTestBase {
 
     [TestMethod]
     public async Task CanRunAlwaysFailsTestCase() {
-        using var sut = await CreateWindowUnderTestAsync(nameof(VishizhukelNetWebView2Window));
-        var process = await sut.FindIdleProcessAsync();
-        var testCaseName = VishizhukelNetWebTestResources.AlwaysFails;
+        using WindowUnderTest sut = await CreateWindowUnderTestAsync(nameof(VishizhukelNetWebView2Window));
+        ControllableProcess process = await sut.FindIdleProcessAsync();
+        string testCaseName = VishizhukelNetWebTestResources.AlwaysFails;
         var tasks = new List<ControllableProcessTask> {
             sut.CreateSetValueTask(process, nameof(ApplicationModel.SelectedTestCase), testCaseName),
         };
@@ -49,14 +48,14 @@ public class TestCasesTest : IntegrationTestBase {
     }
 
     public async Task RunTestCaseAsync(string testCaseName) {
-        await RunTestCasesAsync(new List<string> { testCaseName });
+        await RunTestCasesAsync([testCaseName]);
     }
 
     public async Task RunTestCasesAsync(List<string> testCaseNames) {
-        using var sut = await CreateWindowUnderTestAsync(nameof(VishizhukelNetWebView2Window));
-        var process = await sut.FindIdleProcessAsync();
+        using WindowUnderTest sut = await CreateWindowUnderTestAsync(nameof(VishizhukelNetWebView2Window));
+        ControllableProcess process = await sut.FindIdleProcessAsync();
         var tasks = new List<ControllableProcessTask>();
-        foreach(var testCaseName in testCaseNames) {
+        foreach(string testCaseName in testCaseNames) {
             tasks.Add(sut.CreateSetValueTask(process, nameof(ApplicationModel.SelectedTestCase), testCaseName));
             tasks.Add(sut.CreatePressButtonTask(process, nameof(ApplicationModel.RunTestCase)));
         }

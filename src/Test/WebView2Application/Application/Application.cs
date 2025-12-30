@@ -39,14 +39,14 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
         await Handlers.TestCaseSelectorHandler.UpdateSelectableTestCasesAsync();
 
         var errorsAndInfos = new ErrorsAndInfos();
-        var oustUtilitiesUrl = await _LogicalUrlRepository.GetUrlAsync("OustUtilitiesJs", errorsAndInfos);
+        string oustUtilitiesUrl = await _LogicalUrlRepository.GetUrlAsync("OustUtilitiesJs", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             Model.Status.Type = StatusType.Error;
             Model.Status.Text = errorsAndInfos.ErrorsToString();
             return;
         }
 
-        var jQueryUrl = await _LogicalUrlRepository.GetUrlAsync("JQuery", errorsAndInfos);
+        string jQueryUrl = await _LogicalUrlRepository.GetUrlAsync("JQuery", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             Model.Status.Type = StatusType.Error;
             Model.Status.Text = errorsAndInfos.ErrorsToString();

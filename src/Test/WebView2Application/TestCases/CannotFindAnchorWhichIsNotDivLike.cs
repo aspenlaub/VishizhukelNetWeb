@@ -22,7 +22,7 @@ public class CannotFindAnchorWhichIsNotDivLike : TestCaseBase, ITestCase {
         var scriptStatement = new ScriptStatement {
             Statement = "OustOccurrenceFinder.DoesDocumentHaveDivLikeWithIdOrNthOccurrenceOfClass(\"navbar-brand\", 1)"
         };
-        var scriptCallResult = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, true, false);
+        ScriptCallResponse scriptCallResult = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, true, false);
         scriptCallResult = ScriptCallResponseUtilities.Invert(scriptCallResult, "Could not find first div-like element with id or class 'navbar-brand'");
         return ScriptCallResponseUtilities.ToTestRunErrorsAndInfos(scriptCallResult);
     }

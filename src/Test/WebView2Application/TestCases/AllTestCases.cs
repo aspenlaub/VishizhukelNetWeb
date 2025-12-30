@@ -3,10 +3,10 @@
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.TestCases;
 
 public class AllTestCases {
-    public static IList<ITestCase> Instance { get; } = new List<ITestCase> {
+    public static IList<ITestCase> Instance { get; } = [
         new AlwaysSucceeds(), new AlwaysFails(),
         new CanFindLamasMainByClass(), new CannotFindAnchorWhichIsNotDivLike(),
         new CanFindBody(), new CanFindAnchor(), new CanWaitForStartOfNavigationWhenGoingToUrl(),
         new CanNavigateToUrl(), new CanGetOucidResponse()
-    };
+    ];
 }

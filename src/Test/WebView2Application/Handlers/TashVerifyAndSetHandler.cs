@@ -31,11 +31,11 @@ public class TashVerifyAndSetHandler : TashVerifyAndSetHandlerBase<IApplicationM
     }
 
     protected override Dictionary<string, ICollectionViewSource> CollectionViewSourceNamesToCollectionViewSourceDictionary(ITashTaskHandlingStatus<IApplicationModel> status) {
-        return new();
+        return [];
     }
 
     protected override Dictionary<string, ISimpleCollectionViewSourceHandler> CollectionViewSourceNamesToCollectionViewSourceHandlerDictionary(ITashTaskHandlingStatus<IApplicationModel> status) {
-        return new();
+        return [];
     }
 
     protected override void OnValueTaskProcessed(ITashTaskHandlingStatus<IApplicationModel> status, bool verify, bool set, string actualValue) {

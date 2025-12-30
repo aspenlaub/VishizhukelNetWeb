@@ -22,8 +22,8 @@ public class CanFindAnchor : TestCaseBase, ITestCase {
         var scriptStatement = new ScriptStatement {
             Statement = "OustOccurrenceFinder.DoesDocumentHaveNthOccurrenceOfIdOrClass(\".navbar-brand\", 1)"
         };
-        var scriptCallResponse = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, false, true);
-        scriptCallResponse = ScriptCallResponseUtilities.VerifyExpectedClasses(scriptCallResponse, new List<string> { "navbar-brand" }, "navbar-brand", 1);
+        ScriptCallResponse scriptCallResponse = await guiAndAppHandler.RunScriptAsync<ScriptCallResponse>(scriptStatement, false, true);
+        scriptCallResponse = ScriptCallResponseUtilities.VerifyExpectedClasses(scriptCallResponse, ["navbar-brand"], "navbar-brand", 1);
         return ScriptCallResponseUtilities.ToTestRunErrorsAndInfos(scriptCallResponse);
     }
 }

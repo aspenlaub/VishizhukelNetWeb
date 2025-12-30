@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Helpers;
@@ -11,6 +12,7 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Entities;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Interfaces;
 using Autofac;
 using Microsoft.Web.WebView2.Core;
 using IContainer = Autofac.IContainer;
@@ -37,16 +39,16 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
     }
 
     private async Task InitializeBrowserAsync() {
-        var cacheFolder = new Folder(Path.GetTempPath()).SubFolder("AspenlaubTemp").SubFolder("WebViewCache");
+        IFolder cacheFolder = new Folder(Path.GetTempPath()).SubFolder("AspenlaubTemp").SubFolder("WebViewCache");
         cacheFolder.CreateIfNecessary();
-        var webView2Environment = await CoreWebView2Environment.CreateAsync(null, cacheFolder.FullName);
+        CoreWebView2Environment webView2Environment = await CoreWebView2Environment.CreateAsync(null, cacheFolder.FullName);
         await WebView.EnsureCoreWebView2Async(webView2Environment);
     }
 
     private async Task BuildContainerIfNecessaryAsync() {
         if (Container != null) { return; }
 
-        var builder = await new ContainerBuilder().UseApplicationAsync(this);
+        ContainerBuilder builder = await new ContainerBuilder().UseApplicationAsync(this);
         Container = builder.Build();
     }
 
@@ -56,19 +58,19 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
         _Application = Container.Resolve<Application.Application>();
         _ApplicationModel = Container.Resolve<ApplicationModel>();
 
-        const string url = "https://www.viperfisch.de/js/bootstrap.min-v24070.js";
+        const string url = "http://localhost/kunden/vvsbigband.de/viperfisch.de/webseiten/viperfisch/files/js/bootstrap.min-v24070.js";
         _ApplicationModel.WebView
             .OnDocumentLoaded.AppendStatement($"var script = document.createElement(\"script\"); script.src = \"{url}\"; document.head.appendChild(script);");
 
         await _Application.OnLoadedAsync();
 
-        var commands = _Application.Commands;
+        IApplicationCommands commands = _Application.Commands;
 
-        var guiToAppGate = Container.Resolve<IGuiToWebViewApplicationGate>();
-        var buttonNameToCommandMapper = Container.Resolve<IButtonNameToCommandMapper>();
+        IGuiToWebViewApplicationGate guiToAppGate = Container.Resolve<IGuiToWebViewApplicationGate>();
+        IButtonNameToCommandMapper buttonNameToCommandMapper = Container.Resolve<IButtonNameToCommandMapper>();
 
-        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewUrl, t => _Application.Handlers.WebViewUrlTextHandler.TextChangedAsync(t));
-        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewContentSource, t => _Application.Handlers.WebViewContentSourceTextHandler.TextChangedAsync(t));
+        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewUrl, _Application.Handlers.WebViewUrlTextHandler.TextChangedAsync);
+        guiToAppGate.RegisterAsyncTextBoxCallback(WebViewContentSource, _Application.Handlers.WebViewContentSourceTextHandler.TextChangedAsync);
 
         guiToAppGate.WireButtonAndCommand(GoToUrl, commands.GoToUrlCommand, buttonNameToCommandMapper);
         guiToAppGate.WireButtonAndCommand(RunJs, commands.RunJsCommand, buttonNameToCommandMapper);
@@ -76,7 +78,7 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
 
         guiToAppGate.WireWebView(WebView);
 
-        var handlers = _Application.Handlers;
+        IApplicationHandlers handlers = _Application.Handlers;
         guiToAppGate.RegisterAsyncSelectorCallback(SelectedTestCase, i => handlers.TestCaseSelectorHandler.TestCasesSelectedIndexChangedAsync(i, false));
 
         if (IsWindowUnderTest) {

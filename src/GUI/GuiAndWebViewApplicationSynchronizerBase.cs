@@ -48,15 +48,15 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         }
 
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(RunScriptAsync) + "Base"))) {
-            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             SimpleLogger.LogInformationWithCallStack(Properties.Resources.ExecutingScript, methodNamesFromStack);
             var errorsAndInfos = new ErrorsAndInfos();
-            var webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
+            WebView2 webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
             if (webView2 == null) {
                 return await Task.FromResult(new TResult { Success = new YesNoInconclusive { Inconclusive = false, YesNo = false }, ErrorMessage = errorsAndInfos.ErrorsToString() });
             }
 
-            var json = await webView2.CoreWebView2.ExecuteScriptAsync(scriptStatement.Statement);
+            string json = await webView2.CoreWebView2.ExecuteScriptAsync(scriptStatement.Statement);
             SimpleLogger.LogInformationWithCallStack(Properties.Resources.ScriptExecutedDeserializingResult, methodNamesFromStack);
             if (string.IsNullOrEmpty(json)) {
                 SimpleLogger.LogInformationWithCallStack(Properties.Resources.ScriptCallJsonResultIsEmpty, methodNamesFromStack);
@@ -64,7 +64,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
             }
 
             try {
-                var scriptCallResult = JsonSerializer.Deserialize<TResult>(json);
+                TResult scriptCallResult = JsonSerializer.Deserialize<TResult>(json);
                 if (scriptCallResult is { }) {
                     return scriptCallResult;
 
@@ -84,13 +84,13 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
 
     public async Task NavigateToUrl(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos) {
         using (SimpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(NavigateToUrl)))) {
-            var methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
-            var urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(url);
+            IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+            string urlWithoutOucid = OucidLogAccessor.RemoveOucidFromUrl(url);
             SimpleLogger.LogInformationWithCallStack(string.Format(Properties.Resources.NavigatingToUrl, urlWithoutOucid), methodNamesFromStack);
-            var webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
+            WebView2 webView2 = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
             if (webView2 == null) { return; }
 
-            var navigationStarted = false;
+            bool navigationStarted = false;
 
             void OnNavigationStarting(object o, CoreWebView2NavigationStartingEventArgs coreWebView2NavigationStartingEventArgs) {
                 navigationStarted = true;
@@ -99,7 +99,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
             webView2.CoreWebView2.NavigationStarting += OnNavigationStarting;
             webView2.CoreWebView2.Navigate(url);
             const int maxSeconds = 1;
-            var timeToGiveUp = DateTime.Now.AddSeconds(maxSeconds);
+            DateTime timeToGiveUp = DateTime.Now.AddSeconds(maxSeconds);
             while (DateTime.Now < timeToGiveUp && !navigationStarted) {
                 await Task.Delay(TimeSpan.FromMilliseconds(100));
             }
@@ -113,8 +113,8 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     private WebView2 GetWebViewControl(IErrorsAndInfos errorsAndInfos, IList<string> methodNamesFromStack) {
-        var webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
-        var webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
+        PropertyInfo webView2Property = typeof(TModel).GetPropertiesAndInterfaceProperties().FirstOrDefault(p => p.Name == nameof(IWebViewApplicationModelBase.WebView));
+        WebView2 webView2 = webView2Property == null || !ModelPropertyToWindowFieldMapping.ContainsKey(webView2Property)
             ? null
             : (WebView2)ModelPropertyToWindowFieldMapping[webView2Property].GetValue(Window);
         if (webView2?.CoreWebView2 != null) {

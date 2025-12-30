@@ -10,18 +10,13 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 
-public class OucidLogAccessor : IOucidLogAccessor {
-    private readonly IFolderResolver _FolderResolver;
+public class OucidLogAccessor(IFolderResolver folderResolver) : IOucidLogAccessor {
     protected IFolder OucidLogFolder;
-
-    public OucidLogAccessor(IFolderResolver folderResolver) {
-        _FolderResolver = folderResolver;
-    }
 
     protected async Task<bool> SetOucidLogFolderIfNecessaryAsync(IErrorsAndInfos errorsAndInfos) {
         if (OucidLogFolder != null) { return true; }
 
-        OucidLogFolder = await _FolderResolver.ResolveAsync(@"$(OucidLog)", errorsAndInfos);
+        OucidLogFolder = await folderResolver.ResolveAsync(@"$(OucidLog)", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) { return false; }
 
         OucidLogFolder.CreateIfNecessary();
@@ -31,14 +26,14 @@ public class OucidLogAccessor : IOucidLogAccessor {
     public async Task WriteOucidAsync(string oucid, OucidResponses oucidResponses, IErrorsAndInfos errorsAndInfos) {
         if (!await SetOucidLogFolderIfNecessaryAsync(errorsAndInfos)) { return; }
 
-        var fileName = OucidFileName(oucid);
+        string fileName = OucidFileName(oucid);
         await File.WriteAllTextAsync(fileName, JsonSerializer.Serialize(oucidResponses, new JsonSerializerOptions { WriteIndented = true }));
     }
 
     public async Task<OucidResponse> ReadAndDeleteOucidAsync(string oucid, IErrorsAndInfos errorsAndInfos) {
         if (!await SetOucidLogFolderIfNecessaryAsync(errorsAndInfos)) { return new OucidResponse(); }
 
-        var fileName = OucidFileName(oucid);
+        string fileName = OucidFileName(oucid);
         if (!File.Exists(fileName)) {
             return new OucidResponse();
         }
@@ -67,12 +62,12 @@ public class OucidLogAccessor : IOucidLogAccessor {
     public string RemoveOucidFromUrl(string url) {
         if (!url.Contains("oucid")) { return url; }
 
-        var pos = url.IndexOf("oucid=", StringComparison.InvariantCulture);
+        int pos = url.IndexOf("oucid=", StringComparison.InvariantCulture);
         return pos >= 0 ? url[..(pos - 1)] : url;
     }
 
     public async Task<string> GenerateOucidAsync(IErrorsAndInfos errorsAndInfos) {
-        var oucid = Guid.NewGuid().ToString();
+        string oucid = Guid.NewGuid().ToString();
         oucid = oucid[..oucid.IndexOf('-')];
 
         var oucidResponses = new OucidResponses { new() };
