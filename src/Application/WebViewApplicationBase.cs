@@ -86,11 +86,12 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
+        var errorsAndInfos = new ErrorsAndInfos();
         if (Model.WebView.IsNavigating && !await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, settings.TimeoutInSeconds)) {
-            return NavigationResult.Failure();
+            errorsAndInfos.Errors.Add(string.Format(Properties.Resources.WebViewStillBusyAfter, settings.TimeoutInSeconds));
+            return NavigationResult.Failure(errorsAndInfos);
         }
 
-        var errorsAndInfos = new ErrorsAndInfos();
         string oucid = await OucidLogAccessor.GenerateOucidAsync(errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             SimpleLogger.LogInformationWithCallStack("Error generating oucid and writing to oucid log", methodNamesFromStack);
@@ -119,7 +120,8 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
         }
 
         if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, settings.TimeoutInSeconds)) {
-            return NavigationResult.Failure();
+            errorsAndInfos.Errors.Add(string.Format(Properties.Resources.WebViewStillBusyAfter, settings.TimeoutInSeconds));
+            return NavigationResult.Failure(errorsAndInfos);
         }
 
         OucidResponse oucidAggregatedResponse = await OucidLogAccessor.ReadAndDeleteOucidAsync(oucid, errorsAndInfos);
