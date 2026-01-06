@@ -1,5 +1,4 @@
-﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
-using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
+﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 
@@ -8,12 +7,8 @@ public class NavigationResult {
     public IErrorsAndInfos ErrorsAndInfos { get; set; }
     public OucidResponse OucidResponse { get; set; }
 
-    public static NavigationResult Failure() {
-        return Failure(new ErrorsAndInfos());
-    }
-
     public static NavigationResult Failure(IErrorsAndInfos errorsAndInfos) {
-        return new NavigationResult { Succeeded = false };
+        return new NavigationResult { Succeeded = false, ErrorsAndInfos = errorsAndInfos };
     }
 
     public static NavigationResult Success(IErrorsAndInfos errorsAndInfos) {
