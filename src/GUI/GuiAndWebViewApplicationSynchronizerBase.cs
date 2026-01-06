@@ -79,7 +79,7 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
     }
 
     public async Task WaitUntilNotNavigatingAnymoreAsync() {
-        await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync("");
+        await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync("", NavigateToUrlSettings.DefaultTimeoutInSeconds);
     }
 
     public async Task NavigateToUrl(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos) {

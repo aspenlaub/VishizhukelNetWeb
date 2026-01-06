@@ -5,6 +5,7 @@ using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Enums;
+using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
@@ -12,26 +13,25 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
 public class WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimpleLogger simpleLogger,
         IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor)
             : IWebViewNavigatingHelper {
-    public const int QuickSeconds = 5, MaxSeconds = 600;
     private const int _intervalInMilliseconds = 500, _largeIntervalInMilliseconds = 5000;
     private const int _doubleCheckIntervalInMilliseconds = 200, _doubleCheckLargeIntervalInMilliseconds = 1000;
 
-    public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url) {
+    public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, int timeoutInSeconds) {
         using (simpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync)))) {
             IList<string> methodNamesFromStack = methodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             if (model.WebView is { IsWired: false }) {
-                model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, MaxSeconds);
+                model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, timeoutInSeconds);
                 model.Status.Type = StatusType.Error;
                 simpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
                 return false;
             }
 
             simpleLogger.LogInformationWithCallStack(Properties.Resources.WaitUntilNotNavigatingAnymore, methodNamesFromStack);
-            await WaitUntilNotNavigatingAnymoreAsync(QuickSeconds, _intervalInMilliseconds, _doubleCheckIntervalInMilliseconds);
+            await WaitUntilNotNavigatingAnymoreAsync(NavigateToUrlSettings.QuickSeconds, _intervalInMilliseconds, _doubleCheckIntervalInMilliseconds);
 
             if (model.WebView.IsNavigating) {
                 simpleLogger.LogInformationWithCallStack(Properties.Resources.WaitLongerUntilNotNavigatingAnymore, methodNamesFromStack);
-                await WaitUntilNotNavigatingAnymoreAsync(MaxSeconds - QuickSeconds, _largeIntervalInMilliseconds, _doubleCheckLargeIntervalInMilliseconds);
+                await WaitUntilNotNavigatingAnymoreAsync(timeoutInSeconds - NavigateToUrlSettings.QuickSeconds, _largeIntervalInMilliseconds, _doubleCheckLargeIntervalInMilliseconds);
             }
 
             if (!model.WebView.IsNavigating) {
@@ -39,7 +39,7 @@ public class WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimple
                 return true;
             }
 
-            model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, MaxSeconds);
+            model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, timeoutInSeconds);
             model.Status.Type = StatusType.Error;
             simpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
             return false;
