@@ -79,16 +79,12 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     }
 
     public async Task<NavigationResult> NavigateToUrlAsync(string url, NavigateToUrlSettings settings) {
-        if (settings.TimeoutInSeconds < 2 * NavigateToUrlSettings.QuickSeconds) {
-            settings.TimeoutInSeconds = 2 * NavigateToUrlSettings.QuickSeconds;
-        }
-
         IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
         SimpleLogger.LogInformationWithCallStack($"App navigating to '{url}'", methodNamesFromStack);
 
         var errorsAndInfos = new ErrorsAndInfos();
-        if (Model.WebView.IsNavigating && !await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, settings.TimeoutInSeconds)) {
-            errorsAndInfos.Errors.Add(string.Format(Properties.Resources.WebViewStillBusyAfter, settings.TimeoutInSeconds));
+        if (Model.WebView.IsNavigating && !await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
+            errorsAndInfos.Errors.Add(string.Format(Properties.Resources.WebViewStillBusyAfter, WebViewNavigatingHelper.TimeoutInSeconds));
             return NavigationResult.Failure(errorsAndInfos);
         }
 
@@ -119,8 +115,8 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
             return NavigationResult.Success(errorsAndInfos);
         }
 
-        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url, settings.TimeoutInSeconds)) {
-            errorsAndInfos.Errors.Add(string.Format(Properties.Resources.WebViewStillBusyAfter, settings.TimeoutInSeconds));
+        if (!await WebViewNavigatingHelper.WaitUntilNotNavigatingAnymoreAsync(url)) {
+            errorsAndInfos.Errors.Add(string.Format(Properties.Resources.WebViewStillBusyAfter, WebViewNavigatingHelper.TimeoutInSeconds));
             return NavigationResult.Failure(errorsAndInfos);
         }
 

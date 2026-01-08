@@ -16,11 +16,13 @@ public class WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimple
     private const int _intervalInMilliseconds = 500, _largeIntervalInMilliseconds = 5000;
     private const int _doubleCheckIntervalInMilliseconds = 200, _doubleCheckLargeIntervalInMilliseconds = 1000;
 
-    public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, int timeoutInSeconds) {
+    public int TimeoutInSeconds => 600;
+
+    public async Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url) {
         using (simpleLogger.BeginScope(SimpleLoggingScopeId.Create(nameof(WaitUntilNotNavigatingAnymoreAsync)))) {
             IList<string> methodNamesFromStack = methodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
             if (model.WebView is { IsWired: false }) {
-                model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, timeoutInSeconds);
+                model.Status.Text = string.Format(Properties.Resources.WebViewMustBeWired, TimeoutInSeconds);
                 model.Status.Type = StatusType.Error;
                 simpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
                 return false;
@@ -31,7 +33,7 @@ public class WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimple
 
             if (model.WebView.IsNavigating) {
                 simpleLogger.LogInformationWithCallStack(Properties.Resources.WaitLongerUntilNotNavigatingAnymore, methodNamesFromStack);
-                await WaitUntilNotNavigatingAnymoreAsync(timeoutInSeconds - NavigateToUrlSettings.QuickSeconds, _largeIntervalInMilliseconds, _doubleCheckLargeIntervalInMilliseconds);
+                await WaitUntilNotNavigatingAnymoreAsync(TimeoutInSeconds - NavigateToUrlSettings.QuickSeconds, _largeIntervalInMilliseconds, _doubleCheckLargeIntervalInMilliseconds);
             }
 
             if (!model.WebView.IsNavigating) {
@@ -39,7 +41,7 @@ public class WebViewNavigatingHelper(IWebViewApplicationModelBase model, ISimple
                 return true;
             }
 
-            model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, timeoutInSeconds);
+            model.Status.Text = string.Format(Properties.Resources.WebViewStillBusyAfter, TimeoutInSeconds);
             model.Status.Type = StatusType.Error;
             simpleLogger.LogInformationWithCallStack(url == "" ? Properties.Resources.ProblemWaitingForPotentialNavigationEnd : $"Problem when navigating to '{url}'", methodNamesFromStack);
             return false;

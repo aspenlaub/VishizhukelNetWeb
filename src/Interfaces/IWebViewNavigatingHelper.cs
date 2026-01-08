@@ -3,5 +3,6 @@
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Interfaces;
 
 public interface IWebViewNavigatingHelper {
-    Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url, int timeoutInSeconds);
+    int TimeoutInSeconds { get; }
+    Task<bool> WaitUntilNotNavigatingAnymoreAsync(string url);
 }
