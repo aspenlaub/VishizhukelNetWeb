@@ -17,36 +17,31 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Int
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Application;
 
-public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynchronizer<ApplicationModel>, ApplicationModel> {
+public class Application(IButtonNameToCommandMapper buttonNameToCommandMapper, IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
+    IGuiAndWebViewApplicationSynchronizer<ApplicationModel> guiAndApplicationSynchronizer,
+    ApplicationModel model, ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository,
+    IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor, IOucidLogAccessor oucidLogAccessor)
+        : WebViewApplicationBase<IGuiAndWebViewApplicationSynchronizer<ApplicationModel>,ApplicationModel>(buttonNameToCommandMapper,
+            toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger,
+            methodNamesFromStackFramesExtractor, oucidLogAccessor) {
     public IApplicationHandlers Handlers { get; private set; }
     public IApplicationCommands Commands { get; private set; }
 
     public ITashHandler<ApplicationModel> TashHandler { get; private set; }
-    private readonly ITashAccessor _TashAccessor;
-    private readonly ILogicalUrlRepository _LogicalUrlRepository;
-
-    public Application(IButtonNameToCommandMapper buttonNameToCommandMapper, IToggleButtonNameToHandlerMapper toggleButtonNameToHandlerMapper,
-            IGuiAndWebViewApplicationSynchronizer<ApplicationModel> guiAndApplicationSynchronizer, ApplicationModel model,
-            ITashAccessor tashAccessor, ISimpleLogger simpleLogger, ILogicalUrlRepository logicalUrlRepository, IMethodNamesFromStackFramesExtractor methodNamesFromStackFramesExtractor,
-            IOucidLogAccessor oucidLogAccessor)
-        : base(buttonNameToCommandMapper, toggleButtonNameToHandlerMapper, guiAndApplicationSynchronizer, model, simpleLogger, methodNamesFromStackFramesExtractor, oucidLogAccessor) {
-        _TashAccessor = tashAccessor;
-        _LogicalUrlRepository = logicalUrlRepository;
-    }
 
     public override async Task OnLoadedAsync() {
         await base.OnLoadedAsync();
         await Handlers.TestCaseSelectorHandler.UpdateSelectableTestCasesAsync();
 
         var errorsAndInfos = new ErrorsAndInfos();
-        string oustUtilitiesUrl = await _LogicalUrlRepository.GetUrlAsync("OustUtilitiesJs", errorsAndInfos);
+        string oustUtilitiesUrl = await logicalUrlRepository.GetUrlAsync("OustUtilitiesJs", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             Model.Status.Type = StatusType.Error;
             Model.Status.Text = errorsAndInfos.ErrorsToString();
             return;
         }
 
-        string jQueryUrl = await _LogicalUrlRepository.GetUrlAsync("JQuery", errorsAndInfos);
+        string jQueryUrl = await logicalUrlRepository.GetUrlAsync("JQuery", errorsAndInfos);
         if (errorsAndInfos.AnyErrors()) {
             Model.Status.Type = StatusType.Error;
             Model.Status.Text = errorsAndInfos.ErrorsToString();
@@ -80,15 +75,15 @@ public class Application : WebViewApplicationBase<IGuiAndWebViewApplicationSynch
         Commands = new ApplicationCommands {
             GoToUrlCommand = new GoToUrlCommand(Model, this),
             RunJsCommand = new RunJsCommand(Model, this),
-            RunTestCaseCommand = new RunTestCaseCommand(Model, this, SimpleLogger, _LogicalUrlRepository, MethodNamesFromStackFramesExtractor)
+            RunTestCaseCommand = new RunTestCaseCommand(Model, this, SimpleLogger, logicalUrlRepository, MethodNamesFromStackFramesExtractor)
         };
-        var communicator = new TashCommunicatorBase<IApplicationModel>(_TashAccessor, SimpleLogger, MethodNamesFromStackFramesExtractor);
+        var communicator = new TashCommunicatorBase<IApplicationModel>(tashAccessor, SimpleLogger, MethodNamesFromStackFramesExtractor);
         var selectors = new Dictionary<string, ISelector> {
             { nameof(IApplicationModel.SelectedTestCase), Model.SelectedTestCase }
         };
         var selectorHandler = new TashSelectorHandler(Handlers, SimpleLogger, communicator, selectors, MethodNamesFromStackFramesExtractor);
         var verifyAndSetHandler = new TashVerifyAndSetHandler(Handlers, SimpleLogger, selectorHandler, communicator, selectors, MethodNamesFromStackFramesExtractor);
-        TashHandler = new TashHandler(_TashAccessor, SimpleLogger, ButtonNameToCommandMapper, ToggleButtonNameToHandlerMapper, this, verifyAndSetHandler, selectorHandler, communicator, MethodNamesFromStackFramesExtractor);
+        TashHandler = new TashHandler(tashAccessor, SimpleLogger, ButtonNameToCommandMapper, ToggleButtonNameToHandlerMapper, this, verifyAndSetHandler, selectorHandler, communicator, MethodNamesFromStackFramesExtractor);
     }
 
     public ITashTaskHandlingStatus<ApplicationModel> CreateTashTaskHandlingStatus() {

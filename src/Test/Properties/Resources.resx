@@ -153,6 +153,9 @@
   <data name="CanWaitForStartOfNavigationWhenGoingToUrl" xml:space="preserve">
     <value>Can wait for start of navigation when going to url</value>
   </data>
+  <data name="ContentSourceDoesNotContain" xml:space="preserve">
+    <value>Content source does not contain "{0}"</value>
+  </data>
   <data name="NoOucidResponseReceived" xml:space="preserve">
     <value>No oucid response was received</value>
   </data>

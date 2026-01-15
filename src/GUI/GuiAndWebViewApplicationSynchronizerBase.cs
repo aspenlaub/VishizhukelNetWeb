@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
@@ -18,7 +19,7 @@ using Microsoft.Web.WebView2.Wpf;
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.GUI;
 
 public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
-    : GuiAndApplicationSynchronizerBase<TModel, TWindow>, IGuiAndWebViewApplicationSynchronizer<TModel>
+        : GuiAndApplicationSynchronizerBase<TModel, TWindow>, IGuiAndWebViewApplicationSynchronizer<TModel>
     where TModel : class, IWebViewApplicationModelBase {
     protected readonly IWebViewNavigatingHelper WebViewNavigatingHelper;
     protected readonly IMethodNamesFromStackFramesExtractor MethodNamesFromStackFramesExtractor;
@@ -125,5 +126,16 @@ public class GuiAndWebViewApplicationSynchronizerBase<TModel, TWindow>
         errorsAndInfos.Errors.Add(Properties.Resources.UiDoesNotContainAWebView);
 
         return null;
+    }
+
+    public async Task<string> GetContentSource(IErrorsAndInfos errorsAndInfos) {
+        IList<string> methodNamesFromStack = MethodNamesFromStackFramesExtractor.ExtractMethodNamesFromStackFrames();
+        WebView2 webView = GetWebViewControl(errorsAndInfos, methodNamesFromStack);
+        if (errorsAndInfos.AnyErrors()) { return ""; }
+
+        string source = await webView.CoreWebView2.ExecuteScriptAsync("document.documentElement.innerHTML");
+        source = Regex.Unescape(source);
+        source = source.Substring(1, source.Length - 2);
+        return source;
     }
 }

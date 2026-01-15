@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Entities;
 
@@ -15,4 +16,5 @@ public interface IGuiAndWebViewAppHandler<out TModel> : IGuiAndAppHandler<TModel
     Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement, bool mayFail, bool maySucceed) where TResult : IScriptCallResponse, new();
 
     Task WaitUntilNotNavigatingAnymoreAsync();
+    Task<string> GetContentSource(IErrorsAndInfos errorsAndInfos);
 }

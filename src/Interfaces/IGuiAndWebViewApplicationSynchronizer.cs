@@ -11,4 +11,5 @@ public interface IGuiAndWebViewApplicationSynchronizer<out TModel>
     Task<TResult> RunScriptAsync<TResult>(IScriptStatement scriptStatement) where TResult : IScriptCallResponse, new();
     Task WaitUntilNotNavigatingAnymoreAsync();
     Task NavigateToUrl(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos);
+    Task<string> GetContentSource(IErrorsAndInfos errorsAndInfos);
 }

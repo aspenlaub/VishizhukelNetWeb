@@ -6,12 +6,8 @@ using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Ent
 
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.Helpers;
 
-public class FakeGuiAndApplicationSynchronizer : IGuiAndWebViewApplicationSynchronizer<ApplicationModel> {
-    public ApplicationModel Model { get; }
-
-    public FakeGuiAndApplicationSynchronizer(ApplicationModel model) {
-        Model = model;
-    }
+public class FakeGuiAndApplicationSynchronizer(ApplicationModel model) : IGuiAndWebViewApplicationSynchronizer<ApplicationModel> {
+    public ApplicationModel Model { get; } = model;
 
     public async Task OnModelDataChangedAsync() {
         await Task.CompletedTask;
@@ -30,5 +26,9 @@ public class FakeGuiAndApplicationSynchronizer : IGuiAndWebViewApplicationSynchr
 
     public async Task NavigateToUrl(string url, NavigateToUrlSettings settings, IErrorsAndInfos errorsAndInfos) {
         await Task.CompletedTask;
+    }
+
+    public async Task<string> GetContentSource(IErrorsAndInfos _) {
+        return await Task.FromResult("");
     }
 }

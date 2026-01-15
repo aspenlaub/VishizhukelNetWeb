@@ -162,4 +162,8 @@ public abstract class WebViewApplicationBase<TGuiAndApplicationSynchronizer, TMo
     public async Task WaitUntilNotNavigatingAnymoreAsync() {
         await GuiAndApplicationSynchronizer.WaitUntilNotNavigatingAnymoreAsync();
     }
+
+    public async Task<string> GetContentSource(IErrorsAndInfos errorsAndInfos) {
+        return await GuiAndApplicationSynchronizer.GetContentSource(errorsAndInfos);
+    }
 }

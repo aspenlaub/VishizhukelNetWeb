@@ -19,6 +19,14 @@ public class CanNavigateToUrl : TestCaseBase, ITestCase {
 
         await guiAndAppHandler.NavigateToUrlAsync(url);
 
+        string contentSource = await guiAndAppHandler.GetContentSource(errorsAndInfos);
+        if (errorsAndInfos.AnyErrors()) { return errorsAndInfos; }
+
+        const string tag = "RhönLamas";
+        if (!contentSource.Contains(tag)) {
+            errorsAndInfos.Errors.Add(string.Format(Properties.Resources.ContentSourceDoesNotContain, tag));
+        }
+
         errorsAndInfos.Infos.Add(Properties.Resources.TestCaseSucceeded);
         return errorsAndInfos;
     }
