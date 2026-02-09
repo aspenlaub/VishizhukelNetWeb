@@ -1,5 +1,4 @@
 ﻿using Aspenlaub.Net.GitHub.CSharp.Dvin.Components;
-using Aspenlaub.Net.GitHub.CSharp.Pegh.Components;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Components;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Helpers;
@@ -11,7 +10,7 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Integration.Test;
 
 public static class IntegrationTestContainerBuilder {
     public static ContainerBuilder RegisterForIntegrationTest(this ContainerBuilder builder) {
-        builder.UseDvinAndPegh("VishizhukelNetWeb", new DummyCsArgumentPrompter());
+        builder.UseDvinAndPegh("VishizhukelNetWeb");
         builder.RegisterType<CanvasAndImageAndImageSizeAdjuster>().As<ICanvasAndImageSizeAdjuster>().SingleInstance();
         builder.RegisterType<StarterAndStopper>().As<IStarterAndStopper>();
         builder.RegisterType<WindowUnderTest>();
