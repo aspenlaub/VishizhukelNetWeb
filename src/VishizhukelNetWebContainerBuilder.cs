@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Components;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
@@ -11,19 +10,19 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb;
 
 public static class VishizhukelNetWebContainerBuilder {
-    public static async Task<IServiceCollection> UseVishizhukelNetWebAndPeghAsync(this IServiceCollection services, string applicationName, ICsArgumentPrompter csArgumentPrompter) {
-        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(services, applicationName, csArgumentPrompter, false);
+    public static async Task<IServiceCollection> UseVishizhukelNetWebAndPeghAsync(this IServiceCollection services, string applicationName) {
+        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(services, applicationName, false);
     }
 
-    public static async Task<IServiceCollection> UseVishizhukelNetWebDvinAndPeghAsync(this IServiceCollection services, string applicationName, ICsArgumentPrompter csArgumentPrompter) {
-        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(services, applicationName, csArgumentPrompter, true);
+    public static async Task<IServiceCollection> UseVishizhukelNetWebDvinAndPeghAsync(this IServiceCollection services, string applicationName) {
+        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(services, applicationName, true);
     }
 
-    private static async Task<IServiceCollection> UseVishizhukelNetWebAndPeghOptionallyDvinAsync(IServiceCollection services, string applicationName, ICsArgumentPrompter csArgumentPrompter, bool useDvin) {
+    private static async Task<IServiceCollection> UseVishizhukelNetWebAndPeghOptionallyDvinAsync(IServiceCollection services, string applicationName, bool useDvin) {
         if (useDvin) {
-            await services.UseVishizhukelNetDvinAndPeghAsync(applicationName, csArgumentPrompter);
+            await services.UseVishizhukelNetDvinAndPeghAsync(applicationName);
         } else {
-            await services.UseVishizhukelNetAndPeghAsync(applicationName, csArgumentPrompter);
+            await services.UseVishizhukelNetAndPeghAsync(applicationName);
         }
 
         services.AddTransient<ILogicalUrlRepository, LogicalUrlRepository>();
@@ -31,19 +30,19 @@ public static class VishizhukelNetWebContainerBuilder {
         return services;
     }
 
-    public static async Task<ContainerBuilder> UseVishizhukelNetWebAndPeghAsync(this ContainerBuilder builder, string applicationName, ICsArgumentPrompter csArgumentPrompter) {
-        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(builder, applicationName, csArgumentPrompter, false);
+    public static async Task<ContainerBuilder> UseVishizhukelNetWebAndPeghAsync(this ContainerBuilder builder, string applicationName) {
+        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(builder, applicationName, false);
     }
 
-    public static async Task<ContainerBuilder> UseVishizhukelNetWebDvinAndPeghAsync(this ContainerBuilder builder, string applicationName, ICsArgumentPrompter csArgumentPrompter) {
-        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(builder, applicationName, csArgumentPrompter, true);
+    public static async Task<ContainerBuilder> UseVishizhukelNetWebDvinAndPeghAsync(this ContainerBuilder builder, string applicationName) {
+        return await UseVishizhukelNetWebAndPeghOptionallyDvinAsync(builder, applicationName, true);
     }
 
-    private static async Task<ContainerBuilder> UseVishizhukelNetWebAndPeghOptionallyDvinAsync(ContainerBuilder builder, string applicationName, ICsArgumentPrompter csArgumentPrompter, bool useDvin) {
+    private static async Task<ContainerBuilder> UseVishizhukelNetWebAndPeghOptionallyDvinAsync(ContainerBuilder builder, string applicationName, bool useDvin) {
         if (useDvin) {
-            await builder.UseVishizhukelNetDvinAndPeghAsync(applicationName, csArgumentPrompter);
+            await builder.UseVishizhukelNetDvinAndPeghAsync(applicationName);
         } else {
-            await builder.UseVishizhukelNetAndPeghAsync(applicationName, csArgumentPrompter);
+            await builder.UseVishizhukelNetAndPeghAsync(applicationName);
         }
 
         builder.RegisterType<LogicalUrlRepository>().As<ILogicalUrlRepository>();

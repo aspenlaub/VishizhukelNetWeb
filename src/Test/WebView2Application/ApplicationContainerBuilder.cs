@@ -1,5 +1,4 @@
-﻿using Aspenlaub.Net.GitHub.CSharp.Pegh.Components;
-using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet;
+﻿using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Components;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Helpers;
@@ -14,7 +13,7 @@ namespace Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application
 
 public static class ApplicationContainerBuilder {
     public static async Task<ContainerBuilder> UseApplicationAsync(this ContainerBuilder builder,VishizhukelNetWebView2Window vishizhukelNetWebView2Window) {
-        await builder.UseVishizhukelNetDvinAndPeghAsync("VishizhukelNetWeb", new DummyCsArgumentPrompter());
+        await builder.UseVishizhukelNetDvinAndPeghAsync("VishizhukelNetWeb");
         if (vishizhukelNetWebView2Window == null) {
             builder.RegisterType<FakeGuiAndApplicationSynchronizer>().As(typeof(IGuiAndWebViewApplicationSynchronizer<ApplicationModel>)).SingleInstance();
         } else {
