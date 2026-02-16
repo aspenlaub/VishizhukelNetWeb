@@ -42,7 +42,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3719.77" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3800.47" />
     <PackageReference Include="VishizhukelNet" Version="2.0.2399.321" />
   </ItemGroup>
   <ItemGroup>
