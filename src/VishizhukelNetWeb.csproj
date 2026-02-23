@@ -43,7 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3800.47" />
-    <PackageReference Include="VishizhukelNet" Version="2.0.2405.613" />
+    <PackageReference Include="VishizhukelNet" Version="2.0.2405.1047" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
