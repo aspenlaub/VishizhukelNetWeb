@@ -4,6 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
@@ -77,6 +78,13 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
         guiToAppGate.WireButtonAndCommand(RunTestCase, commands.RunTestCaseCommand, buttonNameToCommandMapper);
 
         guiToAppGate.WireWebView(WebView);
+
+        if (WebView.Source.ToString().StartsWith("http")) {
+            await Wait.UntilAsync(async () => {
+                await Task.Delay(TimeSpan.FromSeconds(5));
+                return _ApplicationModel.WebViewContentSource.Text.Contains("<head");
+            }, TimeSpan.FromMinutes(1));
+        }
 
         IApplicationHandlers handlers = _Application.Handlers;
         guiToAppGate.RegisterAsyncSelectorCallback(SelectedTestCase, i => handlers.TestCaseSelectorHandler.TestCasesSelectedIndexChangedAsync(i, false));
