@@ -77,14 +77,7 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
         guiToAppGate.WireButtonAndCommand(RunJs, commands.RunJsCommand, buttonNameToCommandMapper);
         guiToAppGate.WireButtonAndCommand(RunTestCase, commands.RunTestCaseCommand, buttonNameToCommandMapper);
 
-        guiToAppGate.WireWebView(WebView);
-
-        if (WebView.Source.ToString().StartsWith("http")) {
-            await Wait.UntilAsync(async () => {
-                await Task.Delay(TimeSpan.FromSeconds(5));
-                return _ApplicationModel.WebViewContentSource.Text.Contains("<head");
-            }, TimeSpan.FromMinutes(1));
-        }
+        await guiToAppGate.WireWebViewAsync(WebView);
 
         IApplicationHandlers handlers = _Application.Handlers;
         guiToAppGate.RegisterAsyncSelectorCallback(SelectedTestCase, i => handlers.TestCaseSelectorHandler.TestCasesSelectedIndexChangedAsync(i, false));

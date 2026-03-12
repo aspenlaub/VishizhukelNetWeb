@@ -1,4 +1,7 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Aspenlaub.Net.GitHub.CSharp.Pegh.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Extensions;
@@ -16,11 +19,18 @@ public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel>(IBus
             where TModel: IWebViewApplicationModelBase {
     protected IOucidLogAccessor OucidLogAccessor = oucidLogAccessor;
 
-    public void WireWebView(WebView2 webView) {
+    public async Task WireWebViewAsync(WebView2 webView) {
         webView.SourceChanged += OnWebViewOnSourceChangedAsync;
         webView.NavigationStarting += OnNavigationStartingAsync;
         webView.NavigationCompleted += OnNavigationCompletedAsync;
         ApplicationModel.WebView.IsWired = true;
+        if (webView.Source.ToString().StartsWith("http")) {
+            await Wait.UntilAsync(async () => {
+                await Task.Delay(TimeSpan.FromSeconds(5));
+                return ApplicationModel.WebViewContentSource.Text.Contains("<head");
+            }, TimeSpan.FromMinutes(1));
+        }
+
     }
 
     private async void OnNavigationStartingAsync(object sender, CoreWebView2NavigationStartingEventArgs e) {
