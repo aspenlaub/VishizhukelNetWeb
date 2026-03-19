@@ -25,6 +25,10 @@ public abstract class GuiToWebViewApplicationGateBase<TApplication, TModel>(IBus
         webView.NavigationCompleted += OnNavigationCompletedAsync;
         ApplicationModel.WebView.IsWired = true;
         if (webView.Source.ToString().StartsWith("http")) {
+            string source = await webView.CoreWebView2.ExecuteScriptAsync("document.documentElement.innerHTML");
+            source = Regex.Unescape(source);
+            source = source.Substring(1, source.Length - 2);
+            ApplicationModel.WebViewContentSource.Text = source;
             await Wait.UntilAsync(async () => {
                 await Task.Delay(TimeSpan.FromSeconds(5));
                 return ApplicationModel.WebViewContentSource.Text.Contains("<head");
