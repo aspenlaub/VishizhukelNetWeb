@@ -28,8 +28,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Seoa" Version="2.0.2456.1108" />
-    <PackageReference Include="VishnetIntegrationTestTools" Version="2.0.2456.1134" />
+    <PackageReference Include="Seoa" Version="2.0.2470.1061" />
+    <PackageReference Include="VishnetIntegrationTestTools" Version="2.0.2470.1191" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Test\VishizhukelNetWeb.Test.csproj" />
