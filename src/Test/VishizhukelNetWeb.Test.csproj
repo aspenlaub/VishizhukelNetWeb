@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net10.0-windows</TargetFramework>
-	<UseWPF>true</UseWPF>
+    <UseWPF>true</UseWPF>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <IsPackable>false</IsPackable>
@@ -15,6 +15,7 @@
     <AssemblyProduct>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test</AssemblyProduct>
     <StartupObject>Aspenlaub.Net.GitHub.CSharp.VishizhukelNetWeb.Test.WebView2Application.App</StartupObject>
     <OutputType>WinExe</OutputType>
+    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
