@@ -4,7 +4,6 @@ using System.Runtime.CompilerServices;
 using System.Windows;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Entities;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Extensions;
-using Aspenlaub.Net.GitHub.CSharp.Pegh.Helpers;
 using Aspenlaub.Net.GitHub.CSharp.Pegh.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.TashClient.Interfaces;
 using Aspenlaub.Net.GitHub.CSharp.VishizhukelNet.GUI;
@@ -42,7 +41,10 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
     private async Task InitializeBrowserAsync() {
         IFolder cacheFolder = new Folder(Path.GetTempPath()).SubFolder("AspenlaubTemp").SubFolder("WebViewCache");
         cacheFolder.CreateIfNecessary();
-        CoreWebView2Environment webView2Environment = await CoreWebView2Environment.CreateAsync(null, cacheFolder.FullName);
+        var options = new CoreWebView2EnvironmentOptions {
+            AdditionalBrowserArguments = "--force-color-profile=sRGB"
+        };
+        CoreWebView2Environment webView2Environment = await CoreWebView2Environment.CreateAsync(null, cacheFolder.FullName, options);
         await WebView.EnsureCoreWebView2Async(webView2Environment);
     }
 
@@ -90,6 +92,8 @@ public partial class VishizhukelNetWebView2Window : IAsyncDisposable {
 
             _TashTimer.CreateAndStartTimer(_Application.CreateTashTaskHandlingStatus());
         }
+
+        await commands.GoToUrlCommand.ExecuteAsync();
 
         await ExceptionHandler.RunAsync(WindowsApplication.Current, TimeSpan.FromSeconds(5));
     }
